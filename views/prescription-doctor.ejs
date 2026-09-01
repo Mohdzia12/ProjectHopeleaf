@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Prescription Portal | HopeLeaf</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800">
+
+
+<!-- ===================================================== -->
+<!-- HEADER -->
+<!-- ===================================================== -->
+
+<header class="bg-white border-b border-slate-200">
+
+    <div class="max-w-5xl mx-auto px-6 py-5">
+
+        <div class="flex items-center justify-between">
+
+            <div>
+
+                <h1 class="text-2xl font-bold text-emerald-600">
+                    HopeLeaf
+                </h1>
+
+                <p class="text-sm text-slate-400 mt-1">
+                    Prescription Portal
+                </p>
+
+            </div>
+
+            <div
+                class="hidden sm:flex items-center gap-2
+                       px-4 py-2 rounded-full
+                       bg-emerald-50 text-emerald-700
+                       text-sm font-medium"
+            >
+                Doctor Portal
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ===================================================== -->
+<!-- MAIN -->
+<!-- ===================================================== -->
+
+<main class="max-w-3xl mx-auto px-6 py-10">
+
+    <!-- INTRO -->
+
+    <div class="mb-8">
+
+        <p class="text-sm text-emerald-600 font-medium">
+            Doctor Workspace
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-900 mt-2">
+            Upload Prescription
+        </h2>
+
+        <p class="text-slate-500 mt-3">
+            Upload a prescription securely for a HopeLeaf patient.
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ERROR -->
+    <!-- ================================================= -->
+
+    <% if (error) { %>
+
+        <div
+            class="mb-6 p-4 rounded-xl
+                   bg-red-50 border border-red-200
+                   text-red-700 text-sm"
+        >
+            <%= error %>
+        </div>
+
+    <% } %>
+
+
+    <!-- ================================================= -->
+    <!-- SUCCESS -->
+    <!-- ================================================= -->
+
+    <% if (success) { %>
+
+        <div
+            class="mb-6 p-4 rounded-xl
+                   bg-emerald-50 border border-emerald-200
+                   text-emerald-700 text-sm"
+        >
+            <%= success %>
+        </div>
+
+    <% } %>
+
+
+    <!-- ================================================= -->
+    <!-- FORM -->
+    <!-- ================================================= -->
+
+    <div
+        class="bg-white border border-slate-200
+               rounded-2xl shadow-sm p-6 md:p-8"
+    >
+
+        <form
+            action="/prescriptions/doctor"
+            method="POST"
+            enctype="multipart/form-data"
+            class="space-y-6"
+        >
+
+            <!-- DOCTOR EMAIL -->
+
+            <div>
+
+                <label
+                    for="doctor_email"
+                    class="block text-sm font-medium text-slate-700 mb-2"
+                >
+                    Doctor Email
+                </label>
+
+                <input
+                    type="email"
+                    id="doctor_email"
+                    name="doctor_email"
+                    required
+                    autocomplete="email"
+                    placeholder="doctor@hopeleaf.com"
+                    class="w-full px-4 py-3 rounded-xl
+                           border border-slate-300
+                           focus:outline-none
+                           focus:ring-2
+                           focus:ring-emerald-500
+                           focus:border-emerald-500"
+                >
+
+                <p class="text-xs text-slate-400 mt-2">
+                    Enter the email associated with your HopeLeaf doctor account.
+                </p>
+
+            </div>
+
+
+            <!-- PATIENT EMAIL -->
+
+            <div>
+
+                <label
+                    for="patient_email"
+                    class="block text-sm font-medium text-slate-700 mb-2"
+                >
+                    Patient Email
+                </label>
+
+                <input
+                    type="email"
+                    id="patient_email"
+                    name="patient_email"
+                    required
+                    autocomplete="off"
+                    placeholder="patient@hopeleaf.com"
+                    class="w-full px-4 py-3 rounded-xl
+                           border border-slate-300
+                           focus:outline-none
+                           focus:ring-2
+                           focus:ring-emerald-500
+                           focus:border-emerald-500"
+                >
+
+                <p class="text-xs text-slate-400 mt-2">
+                    The prescription will be made available to this patient.
+                </p>
+
+            </div>
+
+
+            <!-- TITLE -->
+
+            <div>
+
+                <label
+                    for="title"
+                    class="block text-sm font-medium text-slate-700 mb-2"
+                >
+                    Prescription Title
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="Prescription"
+                    maxlength="100"
+                    placeholder="Prescription"
+                    class="w-full px-4 py-3 rounded-xl
+                           border border-slate-300
+                           focus:outline-none
+                           focus:ring-2
+                           focus:ring-emerald-500
+                           focus:border-emerald-500"
+                >
+
+            </div>
+
+
+            <!-- FILE -->
+
+            <div>
+
+                <label
+                    for="prescription"
+                    class="block text-sm font-medium text-slate-700 mb-2"
+                >
+                    Prescription File
+                </label>
+
+                <div
+                    class="border-2 border-dashed
+                           border-slate-300
+                           rounded-2xl p-8
+                           text-center
+                           hover:border-emerald-400
+                           transition"
+                >
+
+                    <div class="text-4xl mb-3">
+                        📄
+                    </div>
+
+                    <p class="font-medium text-slate-700">
+                        Select prescription
+                    </p>
+
+                    <p class="text-sm text-slate-400 mt-1">
+                        PDF, JPG, PNG or WEBP
+                    </p>
+
+                    <input
+                        type="file"
+                        id="prescription"
+                        name="prescription"
+                        required
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        class="mt-5 block w-full text-sm
+                               text-slate-500
+                               file:mr-4
+                               file:py-2.5
+                               file:px-4
+                               file:rounded-lg
+                               file:border-0
+                               file:bg-emerald-50
+                               file:text-emerald-700
+                               file:font-medium
+                               hover:file:bg-emerald-100"
+                    >
+
+                </div>
+
+                <p class="text-xs text-slate-400 mt-2">
+                    Maximum file size: 10 MB.
+                </p>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="w-full py-3.5 rounded-xl
+                       bg-emerald-600
+                       text-white font-semibold
+                       hover:bg-emerald-700
+                       transition"
+            >
+                Upload Prescription
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- INFORMATION -->
+    <!-- ================================================= -->
+
+    <div
+        class="mt-6 bg-slate-100
+               border border-slate-200
+               rounded-2xl p-5"
+    >
+
+        <p class="text-sm font-medium text-slate-700">
+            Prescription Portal
+        </p>
+
+        <p class="text-sm text-slate-500 mt-1">
+            This portal is separate from the normal HopeLeaf
+            doctor dashboard. Uploaded prescriptions are stored
+            separately and can later be accessed by the selected patient.
+        </p>
+
+    </div>
+
+</main>
+
+
+<!-- ===================================================== -->
+<!-- FOOTER -->
+<!-- ===================================================== -->
+
+<footer class="text-center py-8 text-xs text-slate-400">
+    HopeLeaf Prescription Portal
+</footer>
+
+
+</body>
+
+</html>

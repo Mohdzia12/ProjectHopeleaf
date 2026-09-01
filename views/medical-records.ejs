@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Medical Records | HopeLeaf</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+
+<body class="bg-slate-50 text-slate-800">
+
+
+<div class="min-h-screen">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="bg-white border-b border-slate-200">
+
+        <div
+            class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between"
+        >
+
+            <div>
+
+                <h1 class="text-2xl font-bold text-emerald-600">
+                    HopeLeaf
+                </h1>
+
+                <p class="text-sm text-slate-400">
+                    Medical Records
+                </p>
+
+            </div>
+
+            <a
+                href="/"
+                class="text-sm text-slate-500 hover:text-emerald-600"
+            >
+                Home
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+
+
+        <% if (!patient) { %>
+
+
+            <!-- =================================================
+                 LOGIN
+            ================================================== -->
+
+            <div class="max-w-md mx-auto">
+
+                <div class="text-center mb-8">
+
+                    <div class="text-4xl mb-4">
+                        📋
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-slate-800">
+                        Medical Records
+                    </h2>
+
+                    <p class="text-slate-500 mt-2">
+                        Enter your HopeLeaf patient account
+                        credentials to access your records.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm"
+                >
+
+                    <% if (error) { %>
+
+                        <div
+                            class="mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700"
+                        >
+                            <%= error %>
+                        </div>
+
+                    <% } %>
+
+
+                    <form
+                        method="POST"
+                        action="/medical-records"
+                        class="space-y-5"
+                    >
+
+
+                        <!-- EMAIL -->
+
+                        <div>
+
+                            <label
+                                for="email"
+                                class="block text-sm font-medium text-slate-700 mb-2"
+                            >
+                                Email
+                            </label>
+
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                required
+                                autocomplete="email"
+                                placeholder="patient@example.com"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            >
+
+                        </div>
+
+
+                        <!-- PASSWORD -->
+
+                        <div>
+
+                            <label
+                                for="password"
+                                class="block text-sm font-medium text-slate-700 mb-2"
+                            >
+                                Password
+                            </label>
+
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                required
+                                autocomplete="current-password"
+                                placeholder="Enter your password"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                            >
+
+                        </div>
+
+
+                        <!-- BUTTON -->
+
+                        <button
+                            type="submit"
+                            class="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition"
+                        >
+                            Access Medical Records
+                        </button>
+
+                    </form>
+
+
+                    <p class="text-xs text-slate-400 text-center mt-5">
+                        Your records are retrieved directly from
+                        the HopeLeaf medical records database.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        <% } else { %>
+
+
+            <!-- =================================================
+                 RECORDS PAGE
+            ================================================== -->
+
+            <div class="mb-8">
+
+                <p class="text-sm text-slate-400">
+                    Patient Portal
+                </p>
+
+                <h2 class="text-3xl font-bold mt-1">
+                    Medical Records
+                </h2>
+
+                <p class="text-slate-500 mt-2">
+                    Your available medical records and
+                    consultation information.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 PATIENT INFORMATION
+            ================================================== -->
+
+            <div
+                class="bg-emerald-600 text-white rounded-2xl p-6 mb-8"
+            >
+
+                <p class="text-emerald-100 text-sm">
+                    Patient
+                </p>
+
+                <h3 class="text-2xl font-semibold mt-1">
+                    <%= patient.name %>
+                </h3>
+
+                <p class="text-emerald-100 mt-1">
+                    <%= patient.email %>
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 NO RECORDS
+            ================================================== -->
+
+            <% if (!records || records.length === 0) { %>
+
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-10 text-center"
+                >
+
+                    <div class="text-4xl mb-4">
+                        📄
+                    </div>
+
+                    <h3 class="text-xl font-semibold">
+                        No Medical Records
+                    </h3>
+
+                    <p class="text-slate-500 mt-2">
+                        No medical records are currently
+                        available for this patient.
+                    </p>
+
+                </div>
+
+
+            <% } else { %>
+
+
+                <!-- =================================================
+                     RECORD LIST
+                ================================================== -->
+
+                <div class="space-y-6">
+
+
+                    <% records.forEach(function(record) { %>
+
+
+                        <div
+                            class="bg-white border border-slate-200 rounded-2xl overflow-hidden"
+                        >
+
+
+                            <!-- RECORD HEADER -->
+
+                            <div
+                                class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                            >
+
+                                <div>
+
+                                    <p
+                                        class="text-xs text-slate-400 uppercase tracking-wide"
+                                    >
+                                        Consultation
+                                    </p>
+
+                                    <h3
+                                        class="text-lg font-semibold mt-1"
+                                    >
+                                        Dr.
+                                        <%= record.doctor_name || "Doctor" %>
+                                    </h3>
+
+                                </div>
+
+
+                                <div class="text-sm text-slate-500">
+
+                                    <% if (record.date) { %>
+
+                                        <%= record.date %>
+
+                                    <% } %>
+
+                                    <% if (record.time) { %>
+
+                                        · <%= record.time %>
+
+                                    <% } %>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="p-6 space-y-6">
+
+
+                                <!-- PATIENT DESCRIPTION -->
+
+                                <% if (record.reason) { %>
+
+                                    <div>
+
+                                        <p
+                                            class="text-xs text-slate-400 uppercase tracking-wide mb-2"
+                                        >
+                                            Patient Description
+                                        </p>
+
+                                        <div
+                                            class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700"
+                                        >
+                                            <%= record.reason %>
+                                        </div>
+
+                                    </div>
+
+                                <% } %>
+
+
+                                <!-- AI SUMMARY -->
+
+                                <% if (record.ai_summary) { %>
+
+                                    <div>
+
+                                        <p
+                                            class="text-xs text-slate-400 uppercase tracking-wide mb-2"
+                                        >
+                                            Patient Summary
+                                        </p>
+
+                                        <div
+                                            class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-line"
+                                        >
+                                            <%= record.ai_summary %>
+                                        </div>
+
+                                    </div>
+
+                                <% } %>
+
+
+                                <!-- CLINICAL NOTE -->
+
+                                <% if (record.clinical_note) { %>
+
+                                    <div>
+
+                                        <p
+                                            class="text-xs text-slate-400 uppercase tracking-wide mb-3"
+                                        >
+                                            Clinical Note
+                                        </p>
+
+
+                                        <% if (record.clinical_note.doctor_comments) { %>
+
+                                            <div class="mb-5">
+
+                                                <p
+                                                    class="text-sm font-medium text-slate-700 mb-2"
+                                                >
+                                                    Doctor's Comments
+                                                </p>
+
+                                                <div
+                                                    class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-line"
+                                                >
+                                                    <%= record.clinical_note.doctor_comments %>
+                                                </div>
+
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <!-- MEDICINES -->
+
+                                        <% if (
+                                            record.clinical_note.medicines &&
+                                            record.clinical_note.medicines.length > 0
+                                        ) { %>
+
+                                            <div class="mb-5">
+
+                                                <p
+                                                    class="text-sm font-medium text-slate-700 mb-2"
+                                                >
+                                                    Medicines
+                                                </p>
+
+                                                <div
+                                                    class="border border-slate-200 rounded-xl overflow-hidden"
+                                                >
+
+                                                    <% record.clinical_note.medicines.forEach(function(medicine) { %>
+
+                                                        <div
+                                                            class="p-4 border-b border-slate-100 last:border-b-0"
+                                                        >
+
+                                                            <p class="font-medium">
+                                                                <%= medicine.name %>
+                                                            </p>
+
+                                                            <p class="text-sm text-slate-500 mt-1">
+
+                                                                <% if (medicine.dosage) { %>
+                                                                    <%= medicine.dosage %>
+                                                                <% } %>
+
+                                                                <% if (medicine.frequency) { %>
+                                                                    · <%= medicine.frequency %>
+                                                                <% } %>
+
+                                                                <% if (medicine.duration) { %>
+                                                                    · <%= medicine.duration %>
+                                                                <% } %>
+
+                                                            </p>
+
+                                                        </div>
+
+                                                    <% }) %>
+
+                                                </div>
+
+                                            </div>
+
+                                        <% } %>
+
+
+                                        <!-- FOLLOW UP -->
+
+                                        <% if (record.clinical_note.follow_up) { %>
+
+                                            <% if (
+                                                record.clinical_note.follow_up.date ||
+                                                record.clinical_note.follow_up.type ||
+                                                record.clinical_note.follow_up.instructions
+                                            ) { %>
+
+                                                <div>
+
+                                                    <p
+                                                        class="text-sm font-medium text-slate-700 mb-2"
+                                                    >
+                                                        Follow-up
+                                                    </p>
+
+                                                    <div
+                                                        class="bg-slate-50 rounded-xl p-4 text-sm"
+                                                    >
+
+                                                        <% if (record.clinical_note.follow_up.date) { %>
+
+                                                            <p>
+                                                                <strong>Date:</strong>
+                                                                <%= record.clinical_note.follow_up.date %>
+                                                            </p>
+
+                                                        <% } %>
+
+
+                                                        <% if (record.clinical_note.follow_up.type) { %>
+
+                                                            <p class="mt-1">
+                                                                <strong>Type:</strong>
+                                                                <%= record.clinical_note.follow_up.type %>
+                                                            </p>
+
+                                                        <% } %>
+
+
+                                                        <% if (record.clinical_note.follow_up.instructions) { %>
+
+                                                            <p class="mt-2 whitespace-pre-line">
+                                                                <strong>Instructions:</strong>
+                                                                <%= record.clinical_note.follow_up.instructions %>
+                                                            </p>
+
+                                                        <% } %>
+
+                                                    </div>
+
+                                                </div>
+
+                                            <% } %>
+
+                                        <% } %>
+
+                                    </div>
+
+                                <% } %>
+
+
+                                <!-- NO CLINICAL NOTE -->
+
+                                <% if (!record.clinical_note) { %>
+
+                                    <div
+                                        class="bg-slate-50 rounded-xl p-4 text-sm text-slate-500"
+                                    >
+                                        No clinical note has been added
+                                        to this consultation yet.
+                                    </div>
+
+                                <% } %>
+
+
+                            </div>
+
+                        </div>
+
+
+                    <% }) %>
+
+
+                </div>
+
+
+            <% } %>
+
+
+        <% } %>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>

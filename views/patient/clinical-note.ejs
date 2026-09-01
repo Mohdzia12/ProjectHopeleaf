@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+```
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Clinical Note | HopeLeaf</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    @media print {
+
+        body {
+            background: white !important;
+            color: #1e293b !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .print-page {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .print-section {
+            break-inside: avoid;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+<!-- =========================================================
+     TOP NAVIGATION
+========================================================== -->
+
+<header class="no-print bg-white border-b border-slate-200">
+
+```
+<div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+
+    <div>
+
+        <p class="text-xs text-slate-400">
+            HopeLeaf Patient Portal
+        </p>
+
+        <h1 class="text-lg font-semibold text-slate-800">
+            Clinical Note
+        </h1>
+
+    </div>
+
+
+    <div class="flex items-center gap-3">
+
+        <a
+            href="/patient/dashboard"
+            class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+        >
+            ← Back to Dashboard
+        </a>
+
+        <button
+            onclick="window.print()"
+            class="px-5 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+        >
+            🖨️ Print / Save PDF
+        </button>
+
+    </div>
+
+</div>
+```
+
+</header>
+
+<!-- =========================================================
+     MAIN PRINTABLE DOCUMENT
+========================================================== -->
+
+<main
+    class="print-page max-w-4xl mx-auto my-8 bg-white shadow-sm border border-slate-200"
+>
+
+```
+<!-- =====================================================
+     LETTERHEAD
+====================================================== -->
+
+<section
+    class="p-8 border-b-4 border-emerald-600 print-section"
+>
+
+    <div class="flex items-start justify-between gap-6">
+
+        <div class="flex items-center gap-4">
+
+            <div
+                class="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-3xl"
+            >
+                🌱
+            </div>
+
+
+            <div>
+
+                <h1 class="text-3xl font-bold text-emerald-700">
+                    HopeLeaf
+                </h1>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Healthcare Center
+                </p>
+
+                <p class="text-xs text-slate-400 mt-1">
+                    Compassionate care. Connected health.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-right">
+
+            <p class="text-xs uppercase tracking-wider text-slate-400">
+                Patient Medical Record
+            </p>
+
+            <p class="text-sm font-medium text-slate-700 mt-2">
+                Clinical Consultation Note
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PATIENT INFORMATION
+====================================================== -->
+
+<section
+    class="p-8 border-b border-slate-200 print-section"
+>
+
+    <div class="flex items-center justify-between mb-5">
+
+        <div>
+
+            <p class="text-xs uppercase tracking-wider text-slate-400">
+                Patient Information
+            </p>
+
+            <h2 class="text-xl font-semibold mt-1">
+                <%= appointment.patient_name || user.name || "Patient" %>
+            </h2>
+
+        </div>
+
+
+        <span
+            class="no-print inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium"
+        >
+            Clinical Record
+        </span>
+
+    </div>
+
+
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div>
+
+            <p class="text-xs text-slate-400">
+                Patient Email
+            </p>
+
+            <p class="text-sm font-medium mt-1 break-all">
+                <%= appointment.patient_email || user.email || "Not available" %>
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="text-xs text-slate-400">
+                Appointment Date
+            </p>
+
+            <p class="text-sm font-medium mt-1">
+                <%= appointment.date || "Not available" %>
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <p class="text-xs text-slate-400">
+                Appointment Time
+            </p>
+
+            <p class="text-sm font-medium mt-1">
+                <%= appointment.time || "Not available" %>
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="mt-5">
+
+        <p class="text-xs text-slate-400">
+            Consulting Doctor
+        </p>
+
+        <p class="text-sm font-medium mt-1">
+            Dr. <%= (appointment.clinical_note && appointment.clinical_note.doctor_name)
+                || appointment.doctor_name
+                || "Doctor" %>
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PATIENT REPORTED CONCERN
+====================================================== -->
+
+<section
+    class="p-8 border-b border-slate-200 print-section"
+>
+
+    <div class="mb-4">
+
+        <p class="text-xs uppercase tracking-wider text-slate-400">
+            Consultation
+        </p>
+
+        <h2 class="text-lg font-semibold mt-1">
+            Patient Reported Concern
+        </h2>
+
+    </div>
+
+
+    <div class="bg-slate-50 rounded-xl p-5">
+
+        <% if (appointment.reason) { %>
+
+            <p class="text-sm text-slate-700 leading-7 whitespace-pre-line">
+                <%= appointment.reason %>
+            </p>
+
+        <% } else { %>
+
+            <p class="text-sm text-slate-400">
+                No concern was recorded for this appointment.
+            </p>
+
+        <% } %>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     DOCTOR'S CLINICAL NOTE
+====================================================== -->
+
+<% if (appointment.clinical_note) { %>
+
+
+    <!-- =================================================
+         DOCTOR COMMENTS
+    ================================================== -->
+
+    <section
+        class="p-8 border-b border-slate-200 print-section"
+    >
+
+        <div class="mb-4">
+
+            <p class="text-xs uppercase tracking-wider text-slate-400">
+                Doctor's Notes
+            </p>
+
+            <h2 class="text-lg font-semibold mt-1">
+                Clinical Comments
+            </h2>
+
+        </div>
+
+
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-5">
+
+            <% if (appointment.clinical_note.doctor_comments) { %>
+
+                <p class="text-sm text-slate-700 leading-7 whitespace-pre-line">
+                    <%= appointment.clinical_note.doctor_comments %>
+                </p>
+
+            <% } else { %>
+
+                <p class="text-sm text-slate-400">
+                    No additional clinical comments were recorded.
+                </p>
+
+            <% } %>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         MEDICINES
+    ================================================== -->
+
+    <section
+        class="p-8 border-b border-slate-200 print-section"
+    >
+
+        <div class="mb-5">
+
+            <p class="text-xs uppercase tracking-wider text-slate-400">
+                Treatment
+            </p>
+
+            <h2 class="text-lg font-semibold mt-1">
+                Prescribed Medicines
+            </h2>
+
+        </div>
+
+
+        <% if (
+            appointment.clinical_note.medicines &&
+            appointment.clinical_note.medicines.length > 0
+        ) { %>
+
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-sm">
+
+                    <thead>
+
+                        <tr class="border-b border-slate-200">
+
+                            <th class="text-left py-3 pr-4 text-xs uppercase tracking-wider text-slate-400 font-medium">
+                                Medicine
+                            </th>
+
+                            <th class="text-left py-3 px-4 text-xs uppercase tracking-wider text-slate-400 font-medium">
+                                Dosage
+                            </th>
+
+                            <th class="text-left py-3 px-4 text-xs uppercase tracking-wider text-slate-400 font-medium">
+                                Frequency
+                            </th>
+
+                            <th class="text-left py-3 pl-4 text-xs uppercase tracking-wider text-slate-400 font-medium">
+                                Duration
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <% appointment.clinical_note.medicines.forEach(function(medicine) { %>
+
+                            <tr class="border-b border-slate-100">
+
+                                <td class="py-4 pr-4">
+
+                                    <p class="font-semibold text-slate-800">
+                                        <%= medicine.name || "—" %>
+                                    </p>
+
+                                </td>
+
+
+                                <td class="py-4 px-4 text-slate-600">
+
+                                    <%= medicine.dosage || "—" %>
+
+                                </td>
+
+
+                                <td class="py-4 px-4 text-slate-600">
+
+                                    <%= medicine.frequency || "—" %>
+
+                                </td>
+
+
+                                <td class="py-4 pl-4 text-slate-600">
+
+                                    <%= medicine.duration || "—" %>
+
+                                </td>
+
+                            </tr>
+
+                        <% }); %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        <% } else { %>
+
+            <div class="bg-slate-50 rounded-xl p-5">
+
+                <p class="text-sm text-slate-400">
+                    No medicines were prescribed in this clinical note.
+                </p>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+
+
+    <!-- =================================================
+         FOLLOW-UP
+    ================================================== -->
+
+    <section
+        class="p-8 border-b border-slate-200 print-section"
+    >
+
+        <div class="mb-5">
+
+            <p class="text-xs uppercase tracking-wider text-slate-400">
+                Follow-up
+            </p>
+
+            <h2 class="text-lg font-semibold mt-1">
+                Follow-up Instructions
+            </h2>
+
+        </div>
+
+
+        <% const followUp = appointment.clinical_note.follow_up || {}; %>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+
+
+            <div>
+
+                <p class="text-xs text-slate-400">
+                    Follow-up Date
+                </p>
+
+                <div class="mt-2 bg-slate-50 rounded-xl px-4 py-3">
+
+                    <p class="text-sm font-medium text-slate-700">
+
+                        <%= followUp.date || "No follow-up date specified" %>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div>
+
+                <p class="text-xs text-slate-400">
+                    Follow-up Type
+                </p>
+
+                <div class="mt-2 bg-slate-50 rounded-xl px-4 py-3">
+
+                    <p class="text-sm font-medium text-slate-700">
+
+                        <%= followUp.type || "Not specified" %>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div>
+
+            <p class="text-xs text-slate-400 mb-2">
+                Instructions
+            </p>
+
+
+            <div class="bg-slate-50 rounded-xl p-5">
+
+                <% if (followUp.instructions) { %>
+
+                    <p class="text-sm text-slate-700 leading-7 whitespace-pre-line">
+                        <%= followUp.instructions %>
+                    </p>
+
+                <% } else { %>
+
+                    <p class="text-sm text-slate-400">
+                        No additional follow-up instructions were recorded.
+                    </p>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         DOCTOR INFORMATION
+    ================================================== -->
+
+    <section
+        class="p-8 border-b border-slate-200 print-section"
+    >
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+
+            <div>
+
+                <p class="text-xs uppercase tracking-wider text-slate-400">
+                    Treating Doctor
+                </p>
+
+                <p class="text-lg font-semibold mt-2">
+
+                    Dr.
+                    <%= appointment.clinical_note.doctor_name
+                        || appointment.doctor_name
+                        || "Doctor" %>
+
+                </p>
+
+            </div>
+
+
+
+            <div>
+
+                <p class="text-xs uppercase tracking-wider text-slate-400">
+                    Note Updated
+                </p>
+
+                <p class="text-sm font-medium text-slate-700 mt-2">
+
+                    <%
+                        let updatedAt = appointment.clinical_note.updated_at;
+
+                        let formattedUpdatedAt = "Not available";
+
+                        if (updatedAt) {
+                            const updatedDate = new Date(updatedAt);
+
+                            if (!isNaN(updatedDate.getTime())) {
+                                formattedUpdatedAt =
+                                    updatedDate.toLocaleString("en-IN", {
+                                        dateStyle: "medium",
+                                        timeStyle: "short"
+                                    });
+                            }
+                        }
+                    %>
+
+                    <%= formattedUpdatedAt %>
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+<% } else { %>
+
+
+    <!-- =================================================
+         NO CLINICAL NOTE
+    ================================================== -->
+
+    <section class="p-8 print-section">
+
+        <div
+            class="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center"
+        >
+
+            <div class="text-3xl mb-3">
+                📋
+            </div>
+
+            <h2 class="text-lg font-semibold text-slate-800">
+                Clinical note not available yet
+            </h2>
+
+            <p class="text-sm text-slate-600 mt-2 max-w-lg mx-auto leading-6">
+                Your doctor has not saved a clinical note for this
+                appointment yet. Once the doctor completes and saves
+                the consultation note, it will appear here.
+            </p>
+
+        </div>
+
+    </section>
+
+
+<% } %>
+
+
+
+<!-- =====================================================
+     DISCLAIMER
+====================================================== -->
+
+<section
+    class="px-8 py-5 border-t border-slate-200 print-section"
+>
+
+    <div class="bg-slate-50 rounded-xl p-4">
+
+        <p class="text-xs text-slate-500 leading-5">
+
+            <strong>Important:</strong>
+            This document contains information recorded by your
+            treating healthcare professional. Please follow your
+            doctor's instructions regarding medicines and follow-up.
+            Do not change, stop, or start medication without consulting
+            your healthcare professional.
+
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
+<footer
+    class="px-8 py-5 border-t border-slate-200 text-center"
+>
+
+    <p class="text-xs text-slate-400">
+        HopeLeaf Healthcare Center
+    </p>
+
+    <p class="text-xs text-slate-400 mt-1">
+        Patient Clinical Record
+    </p>
+
+</footer>
+```
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Clinical Note | HopeLeaf</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+<div class="min-h-screen">
+
+```
+<!-- ============================================================
+     HEADER
+============================================================ -->
+
+<header class="bg-white border-b border-slate-200">
+
+    <div class="max-w-6xl mx-auto px-6 py-5">
+
+        <div class="flex items-center justify-between">
+
+            <div>
+
+                <p class="text-sm text-slate-400">
+                    Doctor Portal
+                </p>
+
+                <h1 class="text-2xl font-semibold">
+                    Clinical Note
+                </h1>
+
+            </div>
+
+            <div class="flex items-center gap-3">
+
+                <a
+                    href="/doctor/dashboard"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                >
+                    ← Dashboard
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ============================================================
+     MAIN
+============================================================ -->
+
+<main class="max-w-6xl mx-auto px-6 py-8">
+
+    <!-- ========================================================
+         SUCCESS MESSAGE
+    ======================================================== -->
+
+    <% if (typeof saved !== "undefined" && saved) { %>
+
+        <div class="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+
+            <div class="flex items-start gap-3">
+
+                <div class="text-emerald-600 text-xl">
+                    ✓
+                </div>
+
+                <div>
+
+                    <h3 class="font-semibold text-emerald-800">
+                        Clinical note saved
+                    </h3>
+
+                    <% if (
+                        typeof prescriptionGenerated !== "undefined" &&
+                        prescriptionGenerated
+                    ) { %>
+
+                        <p class="text-sm text-emerald-700 mt-1">
+                            Prescription image has also been generated
+                            and added to the prescription portal.
+                        </p>
+
+                    <% } else { %>
+
+                        <p class="text-sm text-emerald-700 mt-1">
+                            The clinical note was saved successfully.
+                        </p>
+
+                    <% } %>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    <% } %>
+
+
+    <!-- ========================================================
+         PATIENT INFORMATION
+    ======================================================== -->
+
+    <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+            <div>
+
+                <p class="text-xs uppercase tracking-wide text-slate-400">
+                    Patient
+                </p>
+
+                <h2 class="text-xl font-semibold mt-1">
+                    <%= appointment.patient_name || "Unknown Patient" %>
+                </h2>
+
+                <% if (appointment.patient_email) { %>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        <%= appointment.patient_email %>
+                    </p>
+
+                <% } %>
+
+            </div>
+
+
+            <div class="text-left md:text-right">
+
+                <p class="text-xs uppercase tracking-wide text-slate-400">
+                    Appointment
+                </p>
+
+                <% if (appointment.date) { %>
+
+                    <p class="text-sm font-medium mt-1">
+                        <%= appointment.date %>
+                    </p>
+
+                <% } %>
+
+                <% if (appointment.time) { %>
+
+                    <p class="text-sm text-slate-500">
+                        <%= appointment.time %>
+                    </p>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ========================================================
+         APPOINTMENT REASON
+    ======================================================== -->
+
+    <% if (appointment.reason) { %>
+
+        <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+
+            <p class="text-xs uppercase tracking-wide text-slate-400">
+                Patient's Reason
+            </p>
+
+            <p class="mt-2 text-slate-700 leading-relaxed">
+                <%= appointment.reason %>
+            </p>
+
+        </section>
+
+    <% } %>
+
+
+    <!-- ========================================================
+         CLINICAL NOTE FORM
+    ======================================================== -->
+
+    <form
+        method="POST"
+        action="/doctor/appointment/<%= appointment._id %>/note"
+        class="space-y-6"
+    >
+
+        <!-- ====================================================
+             DOCTOR COMMENTS
+        ==================================================== -->
+
+        <section class="bg-white border border-slate-200 rounded-2xl p-6">
+
+            <div class="mb-5">
+
+                <p class="text-sm text-slate-400">
+                    Consultation
+                </p>
+
+                <h2 class="text-xl font-semibold">
+                    Doctor's Notes
+                </h2>
+
+            </div>
+
+            <label
+                for="doctor_comments"
+                class="block text-sm font-medium text-slate-700 mb-2"
+            >
+                Clinical observations and instructions
+            </label>
+
+            <textarea
+                id="doctor_comments"
+                name="doctor_comments"
+                rows="7"
+                placeholder="Enter clinical observations, diagnosis notes, instructions, precautions, etc."
+                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-y"
+            ><%= appointment.clinical_note?.doctor_comments || "" %></textarea>
+
+        </section>
+
+
+        <!-- ====================================================
+             MEDICINES
+        ==================================================== -->
+
+        <section class="bg-white border border-slate-200 rounded-2xl p-6">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+
+                <div>
+
+                    <p class="text-sm text-slate-400">
+                        Prescription
+                    </p>
+
+                    <h2 class="text-xl font-semibold">
+                        Medicines
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        Adding medicines will generate a prescription
+                        image automatically when you save the note.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    onclick="addMedicine()"
+                    class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition"
+                >
+                    + Add Medicine
+                </button>
+
+            </div>
+
+
+            <div
+                id="medicine-container"
+                class="space-y-4"
+            >
+
+                <% 
+                    const existingMedicines =
+                        appointment.clinical_note &&
+                        Array.isArray(appointment.clinical_note.medicines)
+                            ? appointment.clinical_note.medicines
+                            : [];
+                %>
+
+
+                <% if (existingMedicines.length > 0) { %>
+
+                    <% existingMedicines.forEach(function(medicine) { %>
+
+                        <div class="medicine-row border border-slate-200 rounded-xl p-4">
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                                <div>
+
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">
+                                        Medicine
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="medicine_name"
+                                        value="<%= medicine.name || "" %>"
+                                        placeholder="Medicine name"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    >
+
+                                </div>
+
+
+                                <div>
+
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">
+                                        Dosage
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="medicine_dosage"
+                                        value="<%= medicine.dosage || "" %>"
+                                        placeholder="e.g. 500 mg"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    >
+
+                                </div>
+
+
+                                <div>
+
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">
+                                        Frequency
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="medicine_frequency"
+                                        value="<%= medicine.frequency || "" %>"
+                                        placeholder="e.g. Twice daily"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    >
+
+                                </div>
+
+
+                                <div class="flex gap-2">
+
+                                    <div class="flex-1">
+
+                                        <label class="block text-xs font-medium text-slate-500 mb-1">
+                                            Duration
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="medicine_duration"
+                                            value="<%= medicine.duration || "" %>"
+                                            placeholder="e.g. 5 days"
+                                            class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        >
+
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onclick="removeMedicine(this)"
+                                        class="self-end mb-0 px-3 py-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                        title="Remove medicine"
+                                    >
+                                        ×
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    <% }) %>
+
+                <% } else { %>
+
+                    <!-- Empty medicine row -->
+
+                    <div class="medicine-row border border-slate-200 rounded-xl p-4">
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                            <div>
+
+                                <label class="block text-xs font-medium text-slate-500 mb-1">
+                                    Medicine
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="medicine_name"
+                                    placeholder="Medicine name"
+                                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                >
+
+                            </div>
+
+
+                            <div>
+
+                                <label class="block text-xs font-medium text-slate-500 mb-1">
+                                    Dosage
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="medicine_dosage"
+                                    placeholder="e.g. 500 mg"
+                                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                >
+
+                            </div>
+
+
+                            <div>
+
+                                <label class="block text-xs font-medium text-slate-500 mb-1">
+                                    Frequency
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="medicine_frequency"
+                                    placeholder="e.g. Twice daily"
+                                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                >
+
+                            </div>
+
+
+                            <div class="flex gap-2">
+
+                                <div class="flex-1">
+
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">
+                                        Duration
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="medicine_duration"
+                                        placeholder="e.g. 5 days"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    >
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="removeMedicine(this)"
+                                    class="self-end px-3 py-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                <% } %>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================================
+             FOLLOW UP
+        ==================================================== -->
+
+        <section class="bg-white border border-slate-200 rounded-2xl p-6">
+
+            <div class="mb-5">
+
+                <p class="text-sm text-slate-400">
+                    Follow-up
+                </p>
+
+                <h2 class="text-xl font-semibold">
+                    Follow-up Instructions
+                </h2>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <!-- DATE -->
+
+                <div>
+
+                    <label
+                        for="follow_up_date"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                    >
+                        Follow-up Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="follow_up_date"
+                        name="follow_up_date"
+                        value="<%= appointment.clinical_note?.follow_up?.date || "" %>"
+                        class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                </div>
+
+
+                <!-- TYPE -->
+
+                <div>
+
+                    <label
+                        for="follow_up_type"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                    >
+                        Follow-up Type
+                    </label>
+
+                    <select
+                        id="follow_up_type"
+                        name="follow_up_type"
+                        class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                        <option value="">
+                            Select type
+                        </option>
+
+                        <option
+                            value="Routine"
+                            <%= appointment.clinical_note?.follow_up?.type === "Routine" ? "selected" : "" %>
+                        >
+                            Routine
+                        </option>
+
+                        <option
+                            value="Review"
+                            <%= appointment.clinical_note?.follow_up?.type === "Review" ? "selected" : "" %>
+                        >
+                            Review
+                        </option>
+
+                        <option
+                            value="Urgent"
+                            <%= appointment.clinical_note?.follow_up?.type === "Urgent" ? "selected" : "" %>
+                        >
+                            Urgent
+                        </option>
+
+                        <option
+                            value="As Needed"
+                            <%= appointment.clinical_note?.follow_up?.type === "As Needed" ? "selected" : "" %>
+                        >
+                            As Needed
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- INSTRUCTIONS -->
+
+            <div class="mt-5">
+
+                <label
+                    for="follow_up_instructions"
+                    class="block text-sm font-medium text-slate-700 mb-2"
+                >
+                    Instructions
+                </label>
+
+                <textarea
+                    id="follow_up_instructions"
+                    name="follow_up_instructions"
+                    rows="4"
+                    placeholder="Enter follow-up instructions..."
+                    class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-y"
+                ><%= appointment.clinical_note?.follow_up?.instructions || "" %></textarea>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================================
+             SAVE
+        ==================================================== -->
+
+        <section class="bg-white border border-slate-200 rounded-2xl p-6">
+
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+                <div>
+
+                    <h3 class="font-semibold">
+                        Save Clinical Note
+                    </h3>
+
+                    <p class="text-sm text-slate-500 mt-1">
+                        If medicines are entered, HopeLeaf will
+                        automatically create a prescription image
+                        for the patient portal.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition"
+                >
+                    Save Clinical Note
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
+```
+
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+
+<script>
+
+function addMedicine() {
+
+    const container =
+        document.getElementById("medicine-container");
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "medicine-row border border-slate-200 rounded-xl p-4";
+
+    row.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            <div>
+
+                <label class="block text-xs font-medium text-slate-500 mb-1">
+                    Medicine
+                </label>
+
+                <input
+                    type="text"
+                    name="medicine_name"
+                    placeholder="Medicine name"
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label class="block text-xs font-medium text-slate-500 mb-1">
+                    Dosage
+                </label>
+
+                <input
+                    type="text"
+                    name="medicine_dosage"
+                    placeholder="e.g. 500 mg"
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label class="block text-xs font-medium text-slate-500 mb-1">
+                    Frequency
+                </label>
+
+                <input
+                    type="text"
+                    name="medicine_frequency"
+                    placeholder="e.g. Twice daily"
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+
+            </div>
+
+
+            <div class="flex gap-2">
+
+                <div class="flex-1">
+
+                    <label class="block text-xs font-medium text-slate-500 mb-1">
+                        Duration
+                    </label>
+
+                    <input
+                        type="text"
+                        name="medicine_duration"
+                        placeholder="e.g. 5 days"
+                        class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                </div>
+
+                <button
+                    type="button"
+                    onclick="removeMedicine(this)"
+                    class="self-end px-3 py-2.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    container.appendChild(row);
+}
+
+
+function removeMedicine(button) {
+
+    const row =
+        button.closest(".medicine-row");
+
+    if (!row) {
+        return;
+    }
+
+    const container =
+        document.getElementById("medicine-container");
+
+    const rows =
+        container.querySelectorAll(".medicine-row");
+
+    /*
+     * Keep one empty row instead of leaving
+     * the medicine section completely empty.
+     */
+
+    if (rows.length <= 1) {
+
+        row.querySelectorAll("input").forEach(input => {
+            input.value = "";
+        });
+
+        return;
+    }
+
+    row.remove();
+}
+
+
+/*
+ * Prevent accidental double submission.
+ */
+
+document
+    .querySelector("form")
+    .addEventListener("submit", function() {
+
+        const button =
+            this.querySelector('button[type="submit"]');
+
+        if (!button) {
+            return;
+        }
+
+        button.disabled = true;
+
+        button.innerText =
+            "Saving Clinical Note...";
+
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SBAR Shift Handoff Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1329;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --accent-s: #38bdf8;
+      --accent-b: #a78bfa;
+      --accent-a: #f59e0b;
+      --accent-r: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text-main); padding: 1.5rem; line-height: 1.5; }
+    .container { max-width: 1440px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
+    .header-title h1 { font-size: 1.5rem; color: #fff; }
+    .header-title p { color: var(--text-sub); font-size: 0.85rem; }
+    
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 1024px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem; }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem; }
+    .form-group { margin-bottom: 0.85rem; }
+    label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-sub); margin-bottom: 0.3rem; }
+    
+    .sbar-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; margin-bottom: 0.4rem; }
+    .sbar-badge { padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 800; font-size: 0.75rem; color: #fff; }
+    .badge-s { background: var(--accent-s); }
+    .badge-b { background: var(--accent-b); }
+    .badge-a { background: var(--accent-a); }
+    .badge-r { background: var(--accent-r); }
+
+    input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--card-border); color: #fff; padding: 0.55rem 0.75rem; border-radius: 6px; font-size: 0.88rem; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: 1px solid var(--primary); border-color: var(--primary); }
+
+    .chip-container { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
+    .chip { background: #334155; color: var(--text-sub); font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 12px; cursor: pointer; border: 1px solid transparent; user-select: none; }
+    .chip:hover { background: #475569; color: #fff; }
+
+    .btn-group { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    button { padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 0.88rem; transition: background 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; flex: 1; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #334155; color: #fff; }
+    .btn-secondary:hover { background: #475569; }
+
+    /* Live Preview Panel */
+    .preview-box { background: #0f172a; border: 1px solid var(--card-border); border-radius: 6px; padding: 1.25rem; font-size: 0.9rem; line-height: 1.6; }
+    .preview-header { border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem; margin-bottom: 1rem; }
+    .preview-section { margin-bottom: 1.1rem; }
+    .preview-section-title { font-weight: 700; text-transform: uppercase; font-size: 0.78rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
+    .preview-content { color: #cbd5e1; white-space: pre-wrap; word-break: break-word; }
+
+    /* Hidden Printable Canvas */
+    #pdfCanvas { display: none; background: #fff; color: #000; font-family: Arial, sans-serif; padding: 25px; }
+    .print-sheet { border: 2px solid #000; padding: 25px; min-height: 800px; box-sizing: border-box; }
+    .print-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+    .print-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; border: 1px solid #ccc; padding: 8px; margin-bottom: 15px; font-size: 11px; background: #f9f9f9; }
+    .print-sbar-block { margin-bottom: 12px; border: 1px solid #999; border-radius: 4px; overflow: hidden; }
+    .print-sbar-title { background: #eee; padding: 4px 8px; font-weight: bold; font-size: 11px; border-bottom: 1px solid #999; text-transform: uppercase; }
+    .print-sbar-body { padding: 8px; font-size: 12px; min-height: 50px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>SBAR Shift Handoff Generator</h1>
+        <p>Standardized Nurse-to-Nurse Clinical Communication Tool</p>
+      </div>
+      <div>
+        <button type="button" class="btn-secondary" onclick="clearForm()">Clear Fields</button>
+      </div>
+    </header>
+
+    <div class="grid-layout">
+      <!-- Input Panel -->
+      <div class="card">
+        <div class="card-title">Handoff Input Form</div>
+
+        <form id="sbarForm" oninput="updatePreview()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Room / Bed</label>
+              <input type="text" id="room" placeholder="304-B" required>
+            </div>
+            <div class="form-group">
+              <label>Patient Name</label>
+              <input type="text" id="patient" placeholder="Jane Doe" required>
+            </div>
+            <div class="form-group">
+              <label>Age / Gender</label>
+              <input type="text" id="demographics" placeholder="68F">
+            </div>
+            <div class="form-group">
+              <label>Code Status</label>
+              <select id="codeStatus">
+                <option value="Full Code">Full Code</option>
+                <option value="DNR / DNI">DNR / DNI</option>
+                <option value="DNR (Intubation OK)">DNR (Intubation OK)</option>
+                <option value="Comfort Care / Hospice">Comfort Care</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Admit Date / Day #</label>
+              <input type="text" id="admitDay" placeholder="POD#1 / Day 3">
+            </div>
+            <div class="form-group">
+              <label>Attending Physician</label>
+              <input type="text" id="physician" placeholder="Dr. Reynolds">
+            </div>
+            <div class="form-group">
+              <label>Allergies</label>
+              <input type="text" id="allergies" placeholder="Penicillin, Latex" value="NKDA">
+            </div>
+          </div>
+
+          <!-- (S) SITUATION -->
+          <div class="form-group">
+            <label class="sbar-label">
+              <span class="sbar-badge badge-s">S</span>
+              <span>Situation (Primary Problem & Current Event)</span>
+            </label>
+            <div class="chip-container">
+              <span class="chip" onclick="addText('situation', 'Admitted for acute exacerbation of COPD.')">+ COPD</span>
+              <span class="chip" onclick="addText('situation', 'Post-op Day 1 total hip arthroplasty.')">+ Post-Op Hip</span>
+              <span class="chip" onclick="addText('situation', 'Sudden drop in BP post-medication.')">+ BP Drop</span>
+              <span class="chip" onclick="addText('situation', 'Complaining of 7/10 sharp chest pain.')">+ Chest Pain</span>
+            </div>
+            <textarea id="situation" rows="2" placeholder="State current chief complaint, immediate clinical concerns, and changes in condition..."></textarea>
+          </div>
+
+          <!-- (B) BACKGROUND -->
+          <div class="form-group">
+            <label class="sbar-label">
+              <span class="sbar-badge badge-b">B</span>
+              <span>Background (Clinical History & Context)</span>
+            </label>
+            <div class="chip-container">
+              <span class="chip" onclick="addText('background', 'Hx: HTN, T2DM, CKD Stage 3.')">+ Hx: HTN/DM</span>
+              <span class="chip" onclick="addText('background', 'Heparin drip running at 14 units/kg/hr.')">+ Heparin Drip</span>
+              <span class="chip" onclick="addText('background', 'NPO since 00:00 for endoscopy today.')">+ NPO Status</span>
+              <span class="chip" onclick="addText('background', 'Peripheral IV in L forearm (20G, placed 2 days ago).')">+ PIV Access</span>
+            </div>
+            <textarea id="background" rows="3" placeholder="Pertinent medical history, surgical history, active lines/drains, current infusions, isolation status..."></textarea>
+          </div>
+
+          <!-- (A) ASSESSMENT -->
+          <div class="form-group">
+            <label class="sbar-label">
+              <span class="sbar-badge badge-a">A</span>
+              <span>Assessment (Vitals, Systems, Clinical Impression)</span>
+            </label>
+            <div class="chip-container">
+              <span class="chip" onclick="addText('assessment', 'Vitals: BP 118/76, HR 78, SpO2 96% on 2L NC, Temp 98.4F, RR 16.')">+ Normal Vitals</span>
+              <span class="chip" onclick="addText('assessment', 'Lungs with bilateral wheezing; diminished in bases.')">+ Wheezing</span>
+              <span class="chip" onclick="addText('assessment', 'Alert and oriented x4; cooperative.')">+ A&Ox4</span>
+              <span class="chip" onclick="addText('assessment', 'Urine output: 450 mL clear yellow over 8 hrs.')">+ UOP Normal</span>
+            </div>
+            <textarea id="assessment" rows="3" placeholder="Latest vitals, systemic exam findings, critical labs/imaging results, pain rating..."></textarea>
+          </div>
+
+          <!-- (R) RECOMMENDATION -->
+          <div class="form-group">
+            <label class="sbar-label">
+              <span class="sbar-badge badge-r">R</span>
+              <span>Recommendation (Plan, Pending Tasks, Escalation)</span>
+            </label>
+            <div class="chip-container">
+              <span class="chip" onclick="addText('recommendation', 'Repeat CBC and BMP at 06:00.')">+ Morning Labs</span>
+              <span class="chip" onclick="addText('recommendation', 'Anticipate discharge this afternoon pending PT clearance.')">+ Discharge Plan</span>
+              <span class="chip" onclick="addText('recommendation', 'Follow up on pending CT chest with radiologist.')">+ Check CT</span>
+              <span class="chip" onclick="addText('recommendation', 'Needs dressing change before 14:00.')">+ Dressing Change</span>
+            </div>
+            <textarea id="recommendation" rows="2" placeholder="Pending labs, follow-up orders, scheduled procedures, contingency plans..."></textarea>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn-primary" onclick="copyFormattedSBAR()">Copy SBAR (EHR Text)</button>
+            <button type="button" class="btn-secondary" onclick="generateSBARPDF()">Save PDF & Print</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Preview Panel -->
+      <div class="card">
+        <div class="card-title">
+          <span>Standardized Handoff Preview</span>
+          <span id="copyToast" style="font-size: 0.75rem; color: var(--accent-r); display: none;">Copied to Clipboard!</span>
+        </div>
+
+        <div class="preview-box" id="previewArea">
+          <div class="preview-header">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <h2 id="prevPatient" style="font-size: 1.15rem; color: #fff;">[Patient Name / Bed]</h2>
+              <span id="prevCode" style="font-size: 0.75rem; background: #334155; padding: 2px 6px; border-radius: 4px;">Full Code</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-sub); margin-top: 4px;">
+              <span id="prevDemo">Age/Sex: —</span> &bull; 
+              <span id="prevDay">Day: —</span> &bull; 
+              <span id="prevMD">MD: —</span> &bull; 
+              <span id="prevAllergies">Allergies: NKDA</span>
+            </div>
+          </div>
+
+          <div class="preview-section">
+            <div class="preview-section-title" style="color: var(--accent-s);">
+              <span class="sbar-badge badge-s">S</span> SITUATION
+            </div>
+            <div class="preview-content" id="prevSituation">No situation entered yet.</div>
+          </div>
+
+          <div class="preview-section">
+            <div class="preview-section-title" style="color: var(--accent-b);">
+              <span class="sbar-badge badge-b">B</span> BACKGROUND
+            </div>
+            <div class="preview-content" id="prevBackground">No background entered yet.</div>
+          </div>
+
+          <div class="preview-section">
+            <div class="preview-section-title" style="color: var(--accent-a);">
+              <span class="sbar-badge badge-a">A</span> ASSESSMENT
+            </div>
+            <div class="preview-content" id="prevAssessment">No assessment entered yet.</div>
+          </div>
+
+          <div class="preview-section" style="margin-bottom: 0;">
+            <div class="preview-section-title" style="color: var(--accent-r);">
+              <span class="sbar-badge badge-r">R</span> RECOMMENDATION
+            </div>
+            <div class="preview-content" id="prevRecommendation">No recommendation entered yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print/PDF Layout Container -->
+  <div id="pdfCanvas">
+    <div class="print-sheet">
+      <div class="print-header">
+        <div>
+          <h2 style="font-size: 16px; margin: 0;">NURSE SBAR CLINICAL HANDOFF REPORT</h2>
+          <p style="font-size: 10px; color: #555; margin-top: 2px;">CONFIDENTIAL MEDICAL COMMUNICATION</p>
+        </div>
+        <div style="text-align: right;">
+          <h3 id="printRoom" style="font-size: 15px; margin: 0;">ROOM: —</h3>
+          <p id="printTime" style="font-size: 10px; margin-top: 2px;">Generated: —</p>
+        </div>
+      </div>
+
+      <div class="print-grid">
+        <div><strong>Patient:</strong> <span id="printPatient">—</span></div>
+        <div><strong>Age/Gender:</strong> <span id="printDemo">—</span></div>
+        <div><strong>Code Status:</strong> <span id="printCode">—</span></div>
+        <div><strong>Allergies:</strong> <span id="printAllergies">—</span></div>
+        <div><strong>Attending:</strong> <span id="printMD">—</span></div>
+        <div><strong>Hospital Day:</strong> <span id="printDay">—</span></div>
+        <div><strong>Handoff Nurse:</strong> ________________</div>
+        <div><strong>Receiving Nurse:</strong> ________________</div>
+      </div>
+
+      <div class="print-sbar-block">
+        <div class="print-sbar-title" style="color: #0284c7;">(S) Situation & Current Complaint</div>
+        <div class="print-sbar-body" id="printSituation">—</div>
+      </div>
+
+      <div class="print-sbar-block">
+        <div class="print-sbar-title" style="color: #6b21a8;">(B) Background, History & Lines/Drains</div>
+        <div class="print-sbar-body" id="printBackground">—</div>
+      </div>
+
+      <div class="print-sbar-block">
+        <div class="print-sbar-title" style="color: #b45309;">(A) Assessment, Vitals & Systems</div>
+        <div class="print-sbar-body" id="printAssessment">—</div>
+      </div>
+
+      <div class="print-sbar-block">
+        <div class="print-sbar-title" style="color: #047857;">(R) Recommendation, Pending Labs & Plan</div>
+        <div class="print-sbar-body" id="printRecommendation">—</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 25px; font-size: 11px; border-top: 1px solid #000; padding-top: 5px;">
+        <div>Delivering Nurse Signature: _______________________</div>
+        <div>Accepting Nurse Signature: _______________________</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function addText(fieldId, phrase) {
+      const field = document.getElementById(fieldId);
+      if (field.value.trim() === '') {
+        field.value = phrase;
+      } else {
+        field.value += ' ' + phrase;
+      }
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const room = document.getElementById('room').value.trim() || 'Bed ---';
+      const patient = document.getElementById('patient').value.trim() || 'Unnamed Patient';
+      const demo = document.getElementById('demographics').value.trim() || '—';
+      const code = document.getElementById('codeStatus').value;
+      const admit = document.getElementById('admitDay').value.trim() || '—';
+      const md = document.getElementById('physician').value.trim() || '—';
+      const allergies = document.getElementById('allergies').value.trim() || 'NKDA';
+
+      const s = document.getElementById('situation').value.trim() || 'No situation entered yet.';
+      const b = document.getElementById('background').value.trim() || 'No background entered yet.';
+      const a = document.getElementById('assessment').value.trim() || 'No assessment entered yet.';
+      const r = document.getElementById('recommendation').value.trim() || 'No recommendation entered yet.';
+
+      document.getElementById('prevPatient').textContent = `${patient} (${room})`;
+      document.getElementById('prevCode').textContent = code;
+      document.getElementById('prevDemo').textContent = `Age/Sex: ${demo}`;
+      document.getElementById('prevDay').textContent = `Day: ${admit}`;
+      document.getElementById('prevMD').textContent = `MD: ${md}`;
+      document.getElementById('prevAllergies').textContent = `Allergies: ${allergies}`;
+
+      document.getElementById('prevSituation').textContent = s;
+      document.getElementById('prevBackground').textContent = b;
+      document.getElementById('prevAssessment').textContent = a;
+      document.getElementById('prevRecommendation').textContent = r;
+    }
+
+    function copyFormattedSBAR() {
+      const room = document.getElementById('room').value.trim() || '—';
+      const patient = document.getElementById('patient').value.trim() || '—';
+      const demo = document.getElementById('demographics').value.trim() || '—';
+      const code = document.getElementById('codeStatus').value;
+      const admit = document.getElementById('admitDay').value.trim() || '—';
+      const md = document.getElementById('physician').value.trim() || '—';
+      const allergies = document.getElementById('allergies').value.trim() || 'NKDA';
+
+      const s = document.getElementById('situation').value.trim() || 'None reported';
+      const b = document.getElementById('background').value.trim() || 'None reported';
+      const a = document.getElementById('assessment').value.trim() || 'None reported';
+      const r = document.getElementById('recommendation').value.trim() || 'None reported';
+
+      const text = 
+`=== SBAR CLINICAL HANDOFF ===
+PATIENT: ${patient} | ROOM: ${room} | CODE: ${code}
+DEMO: ${demo} | DAY: ${admit} | MD: ${md} | ALLERGIES: ${allergies}
+--------------------------------------------------
+[S - SITUATION]
+${s}
+
+[B - BACKGROUND]
+${b}
+
+[A - ASSESSMENT]
+${a}
+
+[R - RECOMMENDATION]
+${r}
+--------------------------------------------------
+Generated on: ${new Date().toLocaleString()}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('copyToast');
+        toast.style.display = 'inline';
+        setTimeout(() => toast.style.display = 'none', 2500);
+      });
+    }
+
+    function generateSBARPDF() {
+      const patient = document.getElementById('patient').value.trim() || 'Patient';
+      const room = document.getElementById('room').value.trim() || '—';
+
+      document.getElementById('printRoom').textContent = `ROOM: ${room}`;
+      document.getElementById('printPatient').textContent = patient;
+      document.getElementById('printDemo').textContent = document.getElementById('demographics').value.trim() || '—';
+      document.getElementById('printCode').textContent = document.getElementById('codeStatus').value;
+      document.getElementById('printAllergies').textContent = document.getElementById('allergies').value.trim() || 'NKDA';
+      document.getElementById('printMD').textContent = document.getElementById('physician').value.trim() || '—';
+      document.getElementById('printDay').textContent = document.getElementById('admitDay').value.trim() || '—';
+      document.getElementById('printTime').textContent = `Generated: ${new Date().toLocaleString()}`;
+
+      document.getElementById('printSituation').textContent = document.getElementById('situation').value.trim() || '—';
+      document.getElementById('printBackground').textContent = document.getElementById('background').value.trim() || '—';
+      document.getElementById('printAssessment').textContent = document.getElementById('assessment').value.trim() || '—';
+      document.getElementById('printRecommendation').textContent = document.getElementById('recommendation').value.trim() || '—';
+
+      const pdfCanvas = document.getElementById('pdfCanvas');
+      pdfCanvas.style.display = 'block';
+
+      const opt = {
+        margin: [0.3, 0.3, 0.3, 0.3],
+        filename: `SBAR_${patient.replace(/\s+/g, '_')}_${room}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(pdfCanvas).save().then(() => {
+        pdfCanvas.style.display = 'none';
+        window.print();
+      });
+    }
+
+    function clearForm() {
+      if (confirm('Clear the current SBAR entry?')) {
+        document.getElementById('sbarForm').reset();
+        updatePreview();
+      }
+    }
+
+    // Initialize blank preview state
+    updatePreview();
+  </script>
+</body>
+</html>

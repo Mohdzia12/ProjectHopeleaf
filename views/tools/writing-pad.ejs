@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Hospital Writing Pad Designer | HopeLeaf</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .print-area {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+    }
+
+    .paper {
+        min-height: 1120px;
+    }
+</style>
+```
+
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+
+```
+<!-- =========================================================
+     TOP BAR
+========================================================== -->
+
+<header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+            <div>
+                <p class="text-xs uppercase tracking-wider text-emerald-600 font-semibold">
+                    HopeLeaf Tools
+                </p>
+
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-800">
+                    Hospital Writing Pad Designer
+                </h1>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Create a clean printable clinical writing pad.
+                </p>
+            </div>
+
+            <div class="flex gap-2">
+
+                <button
+                    type="button"
+                    onclick="clearForm()"
+                    class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium"
+                >
+                    Clear
+                </button>
+
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm font-medium"
+                >
+                    Print
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================== -->
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+
+        <!-- =================================================
+             EDITOR
+        ================================================== -->
+
+        <section class="no-print bg-white border border-slate-200 rounded-2xl p-5 sm:p-6">
+
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold">
+                    Pad Information
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Enter the information you want printed on the document.
+                </p>
+            </div>
+
+
+            <!-- HOSPITAL -->
+
+            <div class="mb-6">
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Hospital / Clinic
+                </h3>
+
+                <div class="space-y-3">
+
+                    <input
+                        id="hospitalName"
+                        type="text"
+                        placeholder="Hospital / Clinic Name"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="hospitalAddress"
+                        type="text"
+                        placeholder="Address"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <input
+                            id="hospitalPhone"
+                            type="text"
+                            placeholder="Phone"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        >
+
+                        <input
+                            id="hospitalEmail"
+                            type="text"
+                            placeholder="Email"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DOCTOR -->
+
+            <div class="mb-6">
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Doctor
+                </h3>
+
+                <div class="space-y-3">
+
+                    <input
+                        id="doctorName"
+                        type="text"
+                        placeholder="Dr. Doctor Name"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="doctorQualification"
+                        type="text"
+                        placeholder="Qualification / Specialization"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="doctorRegistration"
+                        type="text"
+                        placeholder="Registration Number"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- PATIENT -->
+
+            <div class="mb-6">
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Patient
+                </h3>
+
+                <div class="space-y-3">
+
+                    <input
+                        id="patientName"
+                        type="text"
+                        placeholder="Patient Name"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <input
+                            id="patientAge"
+                            type="text"
+                            placeholder="Age"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                        >
+
+                        <select
+                            id="patientGender"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                        >
+                            <option value="">Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+
+                    </div>
+
+                    <input
+                        id="patientId"
+                        type="text"
+                        placeholder="Patient ID"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- VITALS -->
+
+            <div class="mb-6">
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Vitals
+                </h3>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                    <input
+                        id="bloodPressure"
+                        type="text"
+                        placeholder="BP"
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="pulse"
+                        type="text"
+                        placeholder="Pulse"
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="temperature"
+                        type="text"
+                        placeholder="Temp."
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="weight"
+                        type="text"
+                        placeholder="Weight"
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="height"
+                        type="text"
+                        placeholder="Height"
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                    <input
+                        id="spo2"
+                        type="text"
+                        placeholder="SpO₂"
+                        class="px-3 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- CLINICAL CONTENT -->
+
+            <div class="mb-6">
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Clinical Information
+                </h3>
+
+                <div class="space-y-3">
+
+                    <textarea
+                        id="complaint"
+                        rows="3"
+                        placeholder="Chief Complaint"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                    <textarea
+                        id="history"
+                        rows="4"
+                        placeholder="History / Clinical Notes"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                    <textarea
+                        id="examination"
+                        rows="4"
+                        placeholder="Examination Findings"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                    <textarea
+                        id="assessment"
+                        rows="3"
+                        placeholder="Assessment"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                    <textarea
+                        id="prescription"
+                        rows="5"
+                        placeholder="Prescription / Medicines"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                    <textarea
+                        id="advice"
+                        rows="4"
+                        placeholder="Advice / Instructions"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none outline-none focus:ring-2 focus:ring-emerald-500"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOLLOW UP -->
+
+            <div>
+
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">
+                    Follow-up
+                </h3>
+
+                <input
+                    id="followUp"
+                    type="text"
+                    placeholder="Follow-up date / instructions"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LIVE PREVIEW
+        ================================================== -->
+
+        <section>
+
+            <div class="no-print mb-3">
+
+                <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                    Live Preview
+                </p>
+
+                <h2 class="text-lg font-semibold text-slate-800">
+                    Printable Writing Pad
+                </h2>
+
+            </div>
+
+
+            <div
+                id="printArea"
+                class="print-area paper bg-white border border-slate-200 shadow-xl rounded-xl p-7 sm:p-10"
+            >
+
+                <!-- HEADER -->
+
+                <div class="border-b-2 border-emerald-600 pb-5">
+
+                    <div class="flex justify-between gap-6">
+
+                        <div>
+
+                            <h1
+                                id="previewHospitalName"
+                                class="text-2xl sm:text-3xl font-bold text-emerald-700"
+                            >
+                                HopeLeaf Hospital
+                            </h1>
+
+                            <p
+                                id="previewHospitalAddress"
+                                class="text-sm text-slate-500 mt-1"
+                            >
+                                Hospital / Clinic Address
+                            </p>
+
+                        </div>
+
+                        <div class="text-right">
+
+                            <p
+                                id="previewHospitalPhone"
+                                class="text-sm text-slate-600"
+                            >
+                                Phone
+                            </p>
+
+                            <p
+                                id="previewHospitalEmail"
+                                class="text-sm text-slate-600"
+                            >
+                                Email
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-5">
+
+                        <h2
+                            id="previewDoctorName"
+                            class="text-lg font-bold text-slate-800"
+                        >
+                            Dr. Doctor Name
+                        </h2>
+
+                        <p
+                            id="previewDoctorQualification"
+                            class="text-sm text-slate-500"
+                        >
+                            Qualification / Specialization
+                        </p>
+
+                        <p
+                            id="previewDoctorRegistration"
+                            class="text-xs text-slate-400 mt-1"
+                        >
+                            Registration No.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PATIENT INFORMATION -->
+
+                <div class="py-5 border-b border-slate-200">
+
+                    <div class="flex justify-between items-center mb-3">
+
+                        <h3 class="font-bold text-slate-800">
+                            Patient Information
+                        </h3>
+
+                        <p class="text-sm text-slate-500">
+                            Date:
+                            <span id="previewDate"></span>
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+
+                        <div>
+                            <p class="text-xs text-slate-400">Name</p>
+                            <p id="previewPatientName" class="font-medium mt-1">
+                                —
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-slate-400">Age</p>
+                            <p id="previewPatientAge" class="font-medium mt-1">
+                                —
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-slate-400">Gender</p>
+                            <p id="previewPatientGender" class="font-medium mt-1">
+                                —
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-slate-400">Patient ID</p>
+                            <p id="previewPatientId" class="font-medium mt-1">
+                                —
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- VITALS -->
+
+                <div class="py-5 border-b border-slate-200">
+
+                    <h3 class="font-bold text-slate-800 mb-3">
+                        Vitals
+                    </h3>
+
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">BP</p>
+                            <p id="previewBP" class="font-semibold mt-1">—</p>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">Pulse</p>
+                            <p id="previewPulse" class="font-semibold mt-1">—</p>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">Temp.</p>
+                            <p id="previewTemperature" class="font-semibold mt-1">—</p>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">Weight</p>
+                            <p id="previewWeight" class="font-semibold mt-1">—</p>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">Height</p>
+                            <p id="previewHeight" class="font-semibold mt-1">—</p>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-3">
+                            <p class="text-xs text-slate-400">SpO₂</p>
+                            <p id="previewSpo2" class="font-semibold mt-1">—</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CLINICAL NOTES -->
+
+                <div class="py-5 space-y-5">
+
+                    <div>
+                        <h3 class="font-bold text-slate-800">
+                            Chief Complaint
+                        </h3>
+
+                        <p
+                            id="previewComplaint"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line"
+                        >
+                            —
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <h3 class="font-bold text-slate-800">
+                            History / Clinical Notes
+                        </h3>
+
+                        <p
+                            id="previewHistory"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line"
+                        >
+                            —
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <h3 class="font-bold text-slate-800">
+                            Examination Findings
+                        </h3>
+
+                        <p
+                            id="previewExamination"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line"
+                        >
+                            —
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <h3 class="font-bold text-slate-800">
+                            Assessment
+                        </h3>
+
+                        <p
+                            id="previewAssessment"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line"
+                        >
+                            —
+                        </p>
+                    </div>
+
+
+                    <div>
+
+                        <h3 class="font-bold text-slate-800">
+                            Prescription / Medicines
+                        </h3>
+
+                        <div
+                            id="previewPrescription"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line min-h-[70px] border border-slate-200 rounded-lg p-3"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3 class="font-bold text-slate-800">
+                            Advice / Instructions
+                        </h3>
+
+                        <p
+                            id="previewAdvice"
+                            class="text-sm text-slate-600 mt-2 whitespace-pre-line"
+                        >
+                            —
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3 class="font-bold text-slate-800">
+                            Follow-up
+                        </h3>
+
+                        <p
+                            id="previewFollowUp"
+                            class="text-sm text-slate-600 mt-2"
+                        >
+                            —
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="mt-10 pt-6 border-t border-slate-200">
+
+                    <div class="flex justify-between items-end">
+
+                        <div>
+
+                            <p class="text-xs text-slate-400">
+                                HopeLeaf Healthcare
+                            </p>
+
+                            <p class="text-xs text-slate-400 mt-1">
+                                This document is intended for clinical use.
+                            </p>
+
+                        </div>
+
+                        <div class="text-center">
+
+                            <div class="h-10 w-40 border-b border-slate-400"></div>
+
+                            <p class="text-xs text-slate-500 mt-2">
+                                Doctor Signature
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+    const fields = {
+
+        hospitalName: "previewHospitalName",
+        hospitalAddress: "previewHospitalAddress",
+        hospitalPhone: "previewHospitalPhone",
+        hospitalEmail: "previewHospitalEmail",
+
+        doctorName: "previewDoctorName",
+        doctorQualification: "previewDoctorQualification",
+        doctorRegistration: "previewDoctorRegistration",
+
+        patientName: "previewPatientName",
+        patientAge: "previewPatientAge",
+        patientGender: "previewPatientGender",
+        patientId: "previewPatientId",
+
+        bloodPressure: "previewBP",
+        pulse: "previewPulse",
+        temperature: "previewTemperature",
+        weight: "previewWeight",
+        height: "previewHeight",
+        spo2: "previewSpo2",
+
+        complaint: "previewComplaint",
+        history: "previewHistory",
+        examination: "previewExamination",
+        assessment: "previewAssessment",
+        prescription: "previewPrescription",
+        advice: "previewAdvice",
+        followUp: "previewFollowUp"
+
+    };
+
+
+    function updatePreview() {
+
+        Object.keys(fields).forEach(function(fieldId) {
+
+            const input = document.getElementById(fieldId);
+            const output = document.getElementById(fields[fieldId]);
+
+            if (!input || !output) {
+                return;
+            }
+
+            const value = input.value.trim();
+
+            output.textContent = value || "—";
+
+        });
+
+    }
+
+
+    Object.keys(fields).forEach(function(fieldId) {
+
+        const input = document.getElementById(fieldId);
+
+        if (!input) {
+            return;
+        }
+
+        input.addEventListener("input", updatePreview);
+        input.addEventListener("change", updatePreview);
+
+    });
+
+
+    function setCurrentDate() {
+
+        const dateElement = document.getElementById("previewDate");
+
+        const today = new Date();
+
+        dateElement.textContent = today.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    function clearForm() {
+
+        const inputs = document.querySelectorAll(
+            "input, textarea, select"
+        );
+
+        inputs.forEach(function(input) {
+
+            input.value = "";
+
+        });
+
+        updatePreview();
+
+        setCurrentDate();
+
+    }
+
+
+    setCurrentDate();
+    updatePreview();
+
+</script>
+```
+
+</body>
+</html>

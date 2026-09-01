@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical Vitals & Automated Handoff Station</title>
+  <!-- Client-side PDF Generation Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1329;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text-main); padding: 1.5rem; line-height: 1.4; }
+    .container { max-width: 1440px; margin: 0 auto; }
+    
+    /* Header & Mandatory Banners */
+    .banner { background: #7c2d12; border: 1px solid #ea580c; color: #ffedd5; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
+    .station-title h1 { font-size: 1.5rem; color: #fff; }
+    .shift-tag { background: #0f172a; padding: 0.3rem 0.6rem; border-radius: 4px; border: 1px solid var(--card-border); font-size: 0.85rem; }
+
+    /* Layout */
+    .grid-layout { display: grid; grid-template-columns: 440px 1fr; gap: 1.5rem; }
+    @media (max-width: 1100px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem; }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Form Fields & Range Indicators */
+    .form-group { margin-bottom: 0.75rem; position: relative; }
+    label { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-sub); margin-bottom: 0.25rem; }
+    .range-hint { font-size: 0.7rem; color: #38bdf8; text-transform: none; font-weight: normal; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .input-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+    input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--card-border); color: #fff; padding: 0.55rem 0.65rem; border-radius: 6px; font-size: 0.88rem; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    input:invalid { border-color: #f87171; }
+
+    .live-alert { display: none; font-size: 0.7rem; color: #f87171; font-weight: bold; margin-top: 0.2rem; }
+
+    .submit-btn { width: 100%; background: var(--primary); color: #fff; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 0.5rem; font-size: 0.95rem; }
+    .submit-btn:hover { background: var(--primary-hover); }
+
+    /* Live Feed Table */
+    .table-container { overflow-x: auto; max-height: 650px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.82rem; }
+    th { background: #0f172a; color: var(--text-sub); padding: 0.75rem 0.5rem; position: sticky; top: 0; z-index: 10; border-bottom: 2px solid var(--card-border); }
+    td { padding: 0.65rem 0.5rem; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    .badge { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.68rem; font-weight: bold; margin: 0.1rem; }
+    .badge-critical { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+    .badge-warn { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid #f59e0b; }
+    .badge-ok { color: var(--success); font-weight: bold; }
+
+    /* Modals & Overlays */
+    #setupModal { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); padding: 2rem; border-radius: 8px; max-width: 460px; width: 90%; }
+    #lockBanner { display: none; background: #991b1b; color: #fff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; font-weight: bold; }
+
+    /* Printable Chart Styles (Clean White Format for Handoff & PDF) */
+    #pdfRenderArea { display: none; background: #ffffff; color: #000000; font-family: Arial, sans-serif; }
+    .pdf-page { page-break-after: always; padding: 35px 30px; border: 2px solid #000; margin-bottom: 20px; background: #fff; box-sizing: border-box; }
+    .pdf-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .pdf-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .pdf-box { border: 1px solid #777; padding: 8px 10px; border-radius: 4px; background: #fafafa; }
+    .pdf-box h4 { margin-bottom: 4px; font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pdf-box p { font-size: 14px; font-weight: bold; margin: 0; color: #000; }
+    .pdf-alerts { border: 2px solid #b91c1c; background: #fef2f2; color: #991b1b; padding: 8px 12px; margin-bottom: 15px; font-weight: bold; font-size: 12px; border-radius: 4px; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #pdfRenderArea, #pdfRenderArea * { visibility: visible; }
+      #pdfRenderArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+      .pdf-page { border: 1px solid #000; margin: 0; page-break-after: always; height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Shift Initializer Modal -->
+    <div id="setupModal">
+      <div class="modal-content">
+        <h2 style="margin-bottom: 0.4rem; color: #fff;">Nurse Shift Setup</h2>
+        <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1.5rem;">Configure your assigned workload. The station locks automatically when all assigned rooms are logged, generates individual PDF sheets for each patient, saves the file, and triggers the printer.</p>
+        <form id="setupForm" onsubmit="initializeShift(event)">
+          <div class="form-group">
+            <label>Duty Nurse Name</label>
+            <input type="text" id="nurseNameInput" required placeholder="e.g., Nurse Sarah Collins, RN">
+          </div>
+          <div class="form-group">
+            <label>Shift Period</label>
+            <select id="shiftTypeInput">
+              <option value="Day Shift (07:00 - 15:00)">Day Shift (07:00 - 15:00)</option>
+              <option value="Evening Shift (15:00 - 23:00)">Evening Shift (15:00 - 23:00)</option>
+              <option value="Night Shift (23:00 - 07:00)">Night Shift (23:00 - 07:00)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Assigned Room Count</label>
+            <input type="number" id="roomLimitInput" min="1" max="40" required placeholder="e.g., 4">
+          </div>
+          <button type="submit" class="submit-btn" style="margin-top: 1rem;">Start Shift Station</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Instructions / Warning Notice -->
+    <div class="banner">
+      <div>
+        <strong>CLINICAL WORKSTATION MANDATE:</strong> Ensure all physiological entries fall within verified ranges. When all room assignments are logged, your shift is automatically sealed, compiled into single-patient clinical sheets, downloaded, and sent to print.
+      </div>
+    </div>
+
+    <div id="lockBanner">
+      SHIFT COMPLETED & LOCKED: All individual patient logs have been rendered, downloaded as a PDF, and sent to the printer.
+    </div>
+
+    <header>
+      <div class="station-title">
+        <h1>Clinical Observation Station</h1>
+        <p id="stationSubtitle">Awaiting shift configuration...</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <span class="shift-tag" id="nurseTag">Nurse: —</span>
+        <span class="shift-tag" id="quotaTag">Progress: 0 / 0</span>
+      </div>
+    </header>
+
+    <div class="grid-layout">
+      <!-- Input Panel -->
+      <div class="form-column">
+        <div class="card" id="formCard">
+          <div class="card-title">New Observation Entry</div>
+          <form id="vitalsForm" onsubmit="handleFormSubmit(event)">
+            
+            <div class="input-row">
+              <div class="form-group">
+                <label>Room / Bed</label>
+                <input type="text" id="roomNumber" required placeholder="e.g., 302-A">
+              </div>
+              <div class="form-group">
+                <label>Patient ID / MRN</label>
+                <input type="text" id="patientId" required placeholder="PT-8941">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Patient Full Name</label>
+              <input type="text" id="patientName" required placeholder="Full Name">
+            </div>
+
+            <!-- Blood Pressure (Physiologic Valid Range: Sys 50-260, Dia 30-160) -->
+            <div class="input-row">
+              <div class="form-group">
+                <label>Systolic BP <span class="range-hint">90-120 mmHg</span></label>
+                <input type="number" id="systolic" min="50" max="260" placeholder="120" required oninput="checkBP()">
+                <div id="bpAlert" class="live-alert">Hypotension Alert (&lt;90)</div>
+              </div>
+              <div class="form-group">
+                <label>Diastolic BP <span class="range-hint">60-80 mmHg</span></label>
+                <input type="number" id="diastolic" min="30" max="160" placeholder="80" required oninput="checkBP()">
+              </div>
+            </div>
+
+            <!-- Pulse & SpO2 (Physiologic Valid Range: HR 25-250, SpO2 50-100) -->
+            <div class="input-row">
+              <div class="form-group">
+                <label>Pulse / HR <span class="range-hint">60-100 BPM</span></label>
+                <input type="number" id="heartRate" min="25" max="250" placeholder="72" required oninput="checkHR()">
+                <div id="hrAlert" class="live-alert">Tachycardia Alert (&gt;100)</div>
+              </div>
+              <div class="form-group">
+                <label>SpO2 % <span class="range-hint">95-100%</span></label>
+                <input type="number" id="spo2" min="50" max="100" placeholder="98" required oninput="checkSpO2()">
+                <div id="spo2Alert" class="live-alert">Critical Hypoxia (&lt;90%)</div>
+              </div>
+            </div>
+
+            <!-- Glucose, Temp, Resp Rate (Physiologic Valid Ranges) -->
+            <div class="input-trio">
+              <div class="form-group">
+                <label>Glucose <span class="range-hint">70-140</span></label>
+                <input type="number" id="sugar" min="20" max="700" placeholder="100">
+              </div>
+              <div class="form-group">
+                <label>Temp °F <span class="range-hint">97-99°F</span></label>
+                <input type="number" step="0.1" id="temp" min="90.0" max="108.0" placeholder="98.6" required>
+              </div>
+              <div class="form-group">
+                <label>Resp <span class="range-hint">12-20/m</span></label>
+                <input type="number" id="respRate" min="4" max="60" placeholder="16" required>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <div class="form-group">
+                <label>Pain Scale (0-10)</label>
+                <select id="painScale">
+                  <option value="0">0 - No Pain</option>
+                  <option value="2">2 - Mild</option>
+                  <option value="4">4 - Moderate</option>
+                  <option value="6">6 - Severe</option>
+                  <option value="8">8 - Very Severe</option>
+                  <option value="10">10 - Worst Possible</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Oxygen Support</label>
+                <select id="oxygenSupply">
+                  <option value="Room Air">Room Air</option>
+                  <option value="Nasal Cannula (2L)">Nasal Cannula (2L)</option>
+                  <option value="Nasal Cannula (4-6L)">Nasal Cannula (4-6L)</option>
+                  <option value="Venturi Mask">Venturi Mask</option>
+                  <option value="Non-Rebreather">Non-Rebreather</option>
+                  <option value="BiPAP/CPAP">BiPAP / CPAP</option>
+                  <option value="Mechanical Vent">Mechanical Vent</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Consciousness (AVPU)</label>
+              <select id="avpu">
+                <option value="Alert">A - Alert</option>
+                <option value="Voice">V - Responsive to Voice</option>
+                <option value="Pain">P - Responsive to Pain</option>
+                <option value="Unresponsive">U - Unresponsive</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Clinical Notes / Interventions</label>
+              <textarea id="notes" rows="2" placeholder="Document IV fluids, meds administered, pending labs..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">+ Log Patient Observation</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Real-Time Feed Table -->
+      <div class="table-column">
+        <div class="card">
+          <div class="card-title">
+            <span>Shift Observations Feed</span>
+            <span id="feedCounter" style="font-size: 0.8rem; color: var(--text-sub); font-weight: normal;">0 logged</span>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Exact Log Time</th>
+                  <th>Patient / MRN</th>
+                  <th>Room</th>
+                  <th>BP (MAP)</th>
+                  <th>HR</th>
+                  <th>SpO2</th>
+                  <th>Sugar</th>
+                  <th>Temp / RR</th>
+                  <th>Status</th>
+                  <th>Triage Alerts</th>
+                </tr>
+              </thead>
+              <tbody id="logsTbody">
+                <tr><td colspan="10" style="text-align:center; color: var(--text-sub); padding: 2rem;">No entries logged yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Page Print/PDF Render Workspace -->
+  <div id="pdfRenderArea"></div>
+
+  <script>
+    let shiftConfig = { nurseName: '', shiftType: '', roomLimit: 0 };
+    let shiftLogs = [];
+
+    // Real-time visual checks on inputs
+    function checkBP() {
+      const sys = Number(document.getElementById('systolic').value);
+      const alert = document.getElementById('bpAlert');
+      if (sys && sys < 90) {
+        alert.textContent = 'Hypotension Alert (<90)';
+        alert.style.display = 'block';
+      } else if (sys >= 140) {
+        alert.textContent = 'Hypertension Alert (≥140)';
+        alert.style.display = 'block';
+      } else {
+        alert.style.display = 'none';
+      }
+    }
+
+    function checkHR() {
+      const hr = Number(document.getElementById('heartRate').value);
+      const alert = document.getElementById('hrAlert');
+      if (hr && hr > 100) {
+        alert.textContent = 'Tachycardia Alert (>100)';
+        alert.style.display = 'block';
+      } else if (hr && hr < 60) {
+        alert.textContent = 'Bradycardia Alert (<60)';
+        alert.style.display = 'block';
+      } else {
+        alert.style.display = 'none';
+      }
+    }
+
+    function checkSpO2() {
+      const spo2 = Number(document.getElementById('spo2').value);
+      const alert = document.getElementById('spo2Alert');
+      if (spo2 && spo2 < 90) {
+        alert.textContent = 'Critical Hypoxia (<90%)';
+        alert.style.display = 'block';
+      } else if (spo2 && spo2 < 95) {
+        alert.textContent = 'Low Oxygen Saturation (<95%)';
+        alert.style.display = 'block';
+      } else {
+        alert.style.display = 'none';
+      }
+    }
+
+    function initializeShift(e) {
+      e.preventDefault();
+      shiftConfig.nurseName = document.getElementById('nurseNameInput').value.trim();
+      shiftConfig.shiftType = document.getElementById('shiftTypeInput').value;
+      shiftConfig.roomLimit = parseInt(document.getElementById('roomLimitInput').value, 10);
+
+      document.getElementById('stationSubtitle').textContent = `${shiftConfig.shiftType}`;
+      document.getElementById('nurseTag').textContent = `Nurse: ${shiftConfig.nurseName}`;
+      updateProgress();
+
+      document.getElementById('setupModal').style.display = 'none';
+    }
+
+    function updateProgress() {
+      document.getElementById('quotaTag').textContent = `Progress: ${shiftLogs.length} / ${shiftConfig.roomLimit} Rooms`;
+      document.getElementById('feedCounter').textContent = `${shiftLogs.length} of ${shiftConfig.roomLimit} rooms logged`;
+    }
+
+    function assessVitals(d) {
+      const alerts = [];
+      const map = Math.round((d.diastolic * 2 + d.systolic) / 3);
+      d.map = map;
+
+      // Blood Pressure
+      if (d.systolic >= 180 || d.diastolic >= 120) alerts.push({ text: 'HTN Crisis (≥180/120)', type: 'badge-critical' });
+      else if (d.systolic >= 140 || d.diastolic >= 90) alerts.push({ text: 'Stage 2 HTN (≥140/90)', type: 'badge-critical' });
+      else if (d.systolic >= 130 || d.diastolic >= 80) alerts.push({ text: 'Stage 1 HTN (≥130/80)', type: 'badge-warn' });
+      else if (d.systolic < 90 || d.diastolic < 60) alerts.push({ text: 'Hypotension (<90/60)', type: 'badge-critical' });
+      
+      if (map < 65) alerts.push({ text: 'Low MAP (<65)', type: 'badge-critical' });
+
+      // Pulse
+      if (d.heartRate > 120) alerts.push({ text: 'Severe Tachycardia (>120)', type: 'badge-critical' });
+      else if (d.heartRate > 100) alerts.push({ text: 'Tachycardia (>100)', type: 'badge-warn' });
+      else if (d.heartRate < 50) alerts.push({ text: 'Severe Bradycardia (<50)', type: 'badge-critical' });
+      else if (d.heartRate < 60) alerts.push({ text: 'Bradycardia (<60)', type: 'badge-warn' });
+
+      // SpO2
+      if (d.spo2 < 90) alerts.push({ text: 'Critical Hypoxia (<90%)', type: 'badge-critical' });
+      else if (d.spo2 < 95) alerts.push({ text: 'Low SpO2 (<95%)', type: 'badge-warn' });
+
+      // Glucose
+      if (d.sugar) {
+        if (d.sugar > 250) alerts.push({ text: 'Severe Hyperglycemia (>250)', type: 'badge-critical' });
+        else if (d.sugar > 140) alerts.push({ text: 'Elevated Glucose (>140)', type: 'badge-warn' });
+        else if (d.sugar < 70) alerts.push({ text: 'Hypoglycemia (<70)', type: 'badge-critical' });
+      }
+
+      // Temperature
+      if (d.temp >= 103.0) alerts.push({ text: 'High Pyrexia (≥103°F)', type: 'badge-critical' });
+      else if (d.temp >= 100.4) alerts.push({ text: 'Pyrexia (≥100.4°F)', type: 'badge-warn' });
+      else if (d.temp < 95.0) alerts.push({ text: 'Hypothermia (<95°F)', type: 'badge-critical' });
+
+      // Resp Rate
+      if (d.respRate > 24) alerts.push({ text: 'Tachypnea (>24)', type: 'badge-critical' });
+      else if (d.respRate < 10) alerts.push({ text: 'Bradypnea (<10)', type: 'badge-critical' });
+
+      // Consciousness
+      if (d.avpu !== 'Alert') alerts.push({ text: `LOC: ${d.avpu}`, type: 'badge-critical' });
+
+      return alerts;
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      if (shiftLogs.length >= shiftConfig.roomLimit) return;
+
+      const now = new Date();
+      const exactTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const exactDate = now.toLocaleDateString();
+
+      const entry = {
+        id: Date.now(),
+        exactTimestamp: `${exactDate} ${exactTime}`,
+        roomNumber: document.getElementById('roomNumber').value.trim(),
+        patientId: document.getElementById('patientId').value.trim(),
+        patientName: document.getElementById('patientName').value.trim(),
+        systolic: Number(document.getElementById('systolic').value),
+        diastolic: Number(document.getElementById('diastolic').value),
+        heartRate: Number(document.getElementById('heartRate').value),
+        spo2: Number(document.getElementById('spo2').value),
+        sugar: document.getElementById('sugar').value ? Number(document.getElementById('sugar').value) : '—',
+        temp: Number(document.getElementById('temp').value),
+        respRate: Number(document.getElementById('respRate').value),
+        painScale: document.getElementById('painScale').value,
+        oxygenSupply: document.getElementById('oxygenSupply').value,
+        avpu: document.getElementById('avpu').value,
+        notes: document.getElementById('notes').value.trim() || 'No active complaints or interventions recorded.'
+      };
+
+      entry.alerts = assessVitals(entry);
+      shiftLogs.unshift(entry);
+
+      document.getElementById('vitalsForm').reset();
+      document.querySelectorAll('.live-alert').forEach(el => el.style.display = 'none');
+      renderTable();
+      updateProgress();
+
+      if (shiftLogs.length >= shiftConfig.roomLimit) {
+        lockAndExportShift();
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('logsTbody');
+      tbody.innerHTML = '';
+
+      shiftLogs.forEach(item => {
+        const tr = document.createElement('tr');
+        let alertsHtml = '<span class="badge-ok">Normal</span>';
+        if (item.alerts.length > 0) {
+          alertsHtml = item.alerts.map(a => `<span class="badge ${a.type}">${a.text}</span>`).join(' ');
+        }
+
+        tr.innerHTML = `
+          <td><strong>${item.exactTimestamp}</strong></td>
+          <td><div><strong>${item.patientName}</strong></div><small style="color:var(--text-sub);">${item.patientId}</small></td>
+          <td><strong>${item.roomNumber}</strong></td>
+          <td>${item.systolic}/${item.diastolic} <br><small style="color:var(--text-sub);">MAP: ${item.map}</small></td>
+          <td>${item.heartRate} bpm</td>
+          <td>${item.spo2}% <br><small style="color:var(--text-sub);">${item.oxygenSupply}</small></td>
+          <td>${item.sugar !== '—' ? item.sugar + ' mg/dL' : '—'}</td>
+          <td>${item.temp}°F <br><small style="color:var(--text-sub);">${item.respRate} /min</small></td>
+          <td>${item.avpu} <br><small style="color:var(--text-sub);">Pain: ${item.painScale}/10</small></td>
+          <td>${alertsHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function lockAndExportShift() {
+      // 1. Lock down UI inputs
+      const form = document.getElementById('vitalsForm');
+      Array.from(form.elements).forEach(el => el.disabled = true);
+      document.getElementById('submitBtn').textContent = 'Shift Log Completed (Locked)';
+      document.getElementById('submitBtn').style.background = '#475569';
+      document.getElementById('lockBanner').style.display = 'block';
+
+      // 2. Build dedicated clean 1-patient-per-sheet documents
+      const pdfArea = document.getElementById('pdfRenderArea');
+      pdfArea.innerHTML = '';
+
+      shiftLogs.forEach((p, index) => {
+        const page = document.createElement('div');
+        page.className = 'pdf-page';
+        
+        let alertSection = '';
+        if (p.alerts.length > 0) {
+          alertSection = `
+            <div class="pdf-alerts">
+              CRITICAL / ABNORMAL FINDINGS: ${p.alerts.map(a => a.text).join(' &bull; ')}
+            </div>
+          `;
+        }
+
+        page.innerHTML = `
+          <div class="pdf-header">
+            <div>
+              <h2 style="margin:0; font-size: 18px; letter-spacing: 0.5px;">CLINICAL OBSERVATION SHEET</h2>
+              <p style="margin:2px 0 0 0; font-size: 11px; color: #444;">Nurse: ${shiftConfig.nurseName} | Shift: ${shiftConfig.shiftType}</p>
+            </div>
+            <div style="text-align: right;">
+              <h3 style="margin:0; font-size: 16px;">ROOM: ${p.roomNumber}</h3>
+              <p style="margin:2px 0 0 0; font-size: 11px;">Record ${index + 1} of ${shiftLogs.length}</p>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px; border-bottom: 1px solid #999; padding-bottom: 6px; font-size: 12px;">
+            <strong>Patient Name:</strong> ${p.patientName} &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <strong>MRN/ID:</strong> ${p.patientId} &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <strong>Exact Time:</strong> ${p.exactTimestamp}
+          </div>
+
+          ${alertSection}
+
+          <div class="pdf-grid">
+            <div class="pdf-box">
+              <h4>Blood Pressure & Perfusion</h4>
+              <p>${p.systolic} / ${p.diastolic} mmHg</p>
+              <span style="font-size:11px; color:#555;">MAP: ${p.map} mmHg</span>
+            </div>
+            <div class="pdf-box">
+              <h4>Heart Rate / Pulse</h4>
+              <p>${p.heartRate} BPM</p>
+              <span style="font-size:11px; color:#555;">Ref: 60 - 100</span>
+            </div>
+            <div class="pdf-box">
+              <h4>Oxygen Saturation</h4>
+              <p>${p.spo2}%</p>
+              <span style="font-size:11px; color:#555;">${p.oxygenSupply}</span>
+            </div>
+            <div class="pdf-box">
+              <h4>Blood Glucose</h4>
+              <p>${p.sugar !== '—' ? p.sugar + ' mg/dL' : 'Not Tested'}</p>
+              <span style="font-size:11px; color:#555;">Ref: 70 - 140</span>
+            </div>
+            <div class="pdf-box">
+              <h4>Body Temperature</h4>
+              <p>${p.temp} °F</p>
+              <span style="font-size:11px; color:#555;">Ref: 97.0 - 99.0</span>
+            </div>
+            <div class="pdf-box">
+              <h4>Respiratory Rate</h4>
+              <p>${p.respRate} /min</p>
+              <span style="font-size:11px; color:#555;">Ref: 12 - 20</span>
+            </div>
+          </div>
+
+          <div class="pdf-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
+            <div class="pdf-box">
+              <h4>Consciousness (AVPU)</h4>
+              <p>${p.avpu}</p>
+            </div>
+            <div class="pdf-box">
+              <h4>Pain Score (0 - 10)</h4>
+              <p>${p.painScale} / 10</p>
+            </div>
+          </div>
+
+          <div class="pdf-box" style="min-height: 90px; margin-bottom: 25px;">
+            <h4>Clinical Observations, Meds & Interventions</h4>
+            <p style="font-weight: normal; font-size: 12px; margin-top: 4px;">${p.notes}</p>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 11px; border-top: 1px solid #000; padding-top: 8px;">
+            <div>Nurse Signature: _____________________________________</div>
+            <div>Attending Review: _____________________________________</div>
+          </div>
+        `;
+        pdfArea.appendChild(page);
+      });
+
+      // 3. Compile PDF, download file, and open print spooler
+      pdfArea.style.display = 'block';
+      const opt = {
+        margin: [0.3, 0.3, 0.3, 0.3],
+        filename: `Shift_Logs_${shiftConfig.nurseName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(pdfArea).save().then(() => {
+        pdfArea.style.display = 'none';
+        window.print();
+      });
+    }
+  </script>
+</body>
+</html>
