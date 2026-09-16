@@ -12,10 +12,12 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const doctorRoutes = require("./routes/doctorRoutes");
+const nurseRoutes = require("./routes/nurseRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const medicalRecordsRoutes = require("./routes/medicalRecordsRoutes");
 const toolsRoutes = require("./routes/toolsRoutes");
 const prescriptionRoutes = require("./routes/prescriptionRoutes");
+
 // ============================================================
 // CREATE APP FIRST
 // ============================================================
@@ -82,6 +84,8 @@ app.use("/patient", patientRoutes);
 
 app.use("/doctor", doctorRoutes);
 
+app.use("/nurse", nurseRoutes);
+
 app.use("/admin", adminRoutes);
 
 app.use("/medical-records", medicalRecordsRoutes);
@@ -109,6 +113,10 @@ app.get("/", (req, res) => {
 
         if (role === "doctor") {
             return res.redirect("/doctor/dashboard");
+        }
+
+        if (role === "nurse") {
+            return res.redirect("/nurse/dashboard");
         }
 
         if (role === "patient") {

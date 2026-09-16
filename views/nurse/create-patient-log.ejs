@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HopeLeaf | Create Patient Log</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <header class="bg-white border-b border-slate-200">
+
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="h-16 flex items-center justify-between">
+
+                <a href="/nurse/dashboard" class="flex items-center gap-3">
+
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center">
+
+                        <svg
+                            class="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 5v14M5 12h14"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div>
+
+                        <div class="font-bold text-lg text-slate-900">
+                            HopeLeaf
+                        </div>
+
+                        <div class="text-xs text-slate-500">
+                            Nursing Portal
+                        </div>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="/nurse/patient-logs"
+                    class="text-sm font-medium text-slate-600 hover:text-teal-600"
+                >
+                    Back to Patient Logs
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- Main -->
+    <main class="max-w-4xl mx-auto px-6 py-10">
+
+        <div class="mb-8">
+
+            <p class="text-sm font-medium text-teal-600 mb-1">
+                Clinical documentation
+            </p>
+
+            <h1 class="text-3xl font-bold text-slate-900">
+                Create Patient Log
+            </h1>
+
+            <p class="text-slate-500 mt-2">
+                Record the patient's current condition and send the update to their doctor.
+            </p>
+
+        </div>
+
+
+        <form
+            action="/nurse/patient-log"
+            method="POST"
+            class="space-y-6"
+        >
+
+            <!-- Patient & Doctor -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-lg font-bold text-slate-900 mb-5">
+                    Patient Assignment
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <!-- Patient -->
+                    <div>
+
+                        <label
+                            for="patient_id"
+                            class="block text-sm font-semibold text-slate-700 mb-2"
+                        >
+                            Patient
+                        </label>
+
+                        <select
+                            id="patient_id"
+                            name="patient_id"
+                            required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        >
+
+                            <option value="">
+                                Select patient
+                            </option>
+
+                            <% patients.forEach(patient => { %>
+
+                                <option value="<%= patient._id %>">
+                                    <%= patient.name %>
+                                </option>
+
+                            <% }); %>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Doctor -->
+                    <div>
+
+                        <label
+                            for="doctor_id"
+                            class="block text-sm font-semibold text-slate-700 mb-2"
+                        >
+                            Send To Doctor
+                        </label>
+
+                        <select
+                            id="doctor_id"
+                            name="doctor_id"
+                            required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        >
+
+                            <option value="">
+                                Select doctor
+                            </option>
+
+                            <% doctors.forEach(doctor => { %>
+
+                                <option value="<%= doctor._id %>">
+                                    Dr. <%= doctor.name %>
+                                </option>
+
+                            <% }); %>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Priority -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-lg font-bold text-slate-900 mb-5">
+                    Priority
+                </h2>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+                    <label class="cursor-pointer">
+
+                        <input
+                            type="radio"
+                            name="priority"
+                            value="normal"
+                            checked
+                            class="sr-only peer"
+                        >
+
+                        <div class="border border-slate-200 rounded-xl p-4 peer-checked:border-teal-500 peer-checked:bg-teal-50 transition">
+
+                            <p class="font-semibold text-slate-800">
+                                Normal
+                            </p>
+
+                            <p class="text-xs text-slate-500 mt-1">
+                                Routine update
+                            </p>
+
+                        </div>
+
+                    </label>
+
+
+                    <label class="cursor-pointer">
+
+                        <input
+                            type="radio"
+                            name="priority"
+                            value="low"
+                            class="sr-only peer"
+                        >
+
+                        <div class="border border-slate-200 rounded-xl p-4 peer-checked:border-teal-500 peer-checked:bg-teal-50 transition">
+
+                            <p class="font-semibold text-slate-800">
+                                Low
+                            </p>
+
+                            <p class="text-xs text-slate-500 mt-1">
+                                Non-urgent
+                            </p>
+
+                        </div>
+
+                    </label>
+
+
+                    <label class="cursor-pointer">
+
+                        <input
+                            type="radio"
+                            name="priority"
+                            value="high"
+                            class="sr-only peer"
+                        >
+
+                        <div class="border border-slate-200 rounded-xl p-4 peer-checked:border-orange-500 peer-checked:bg-orange-50 transition">
+
+                            <p class="font-semibold text-slate-800">
+                                High
+                            </p>
+
+                            <p class="text-xs text-slate-500 mt-1">
+                                Needs attention
+                            </p>
+
+                        </div>
+
+                    </label>
+
+
+                    <label class="cursor-pointer">
+
+                        <input
+                            type="radio"
+                            name="priority"
+                            value="urgent"
+                            class="sr-only peer"
+                        >
+
+                        <div class="border border-slate-200 rounded-xl p-4 peer-checked:border-red-500 peer-checked:bg-red-50 transition">
+
+                            <p class="font-semibold text-slate-800">
+                                Urgent
+                            </p>
+
+                            <p class="text-xs text-slate-500 mt-1">
+                                Immediate review
+                            </p>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- Observations -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+
+                <h2 class="text-lg font-bold text-slate-900">
+                    Patient Observations
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1 mb-6">
+                    Record objective observations and relevant patient-reported information.
+                </p>
+
+
+                <!-- Observations -->
+                <div class="mb-5">
+
+                    <label
+                        for="observations"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        General Observations
+                    </label>
+
+                    <textarea
+                        id="observations"
+                        name="observations"
+                        rows="4"
+                        placeholder="Record the patient's current condition and general observations..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Symptoms -->
+                <div class="mb-5">
+
+                    <label
+                        for="symptoms"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        Symptoms
+                    </label>
+
+                    <textarea
+                        id="symptoms"
+                        name="symptoms"
+                        rows="3"
+                        placeholder="Document reported or observed symptoms..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Vital Notes -->
+                <div class="mb-5">
+
+                    <label
+                        for="vital_notes"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        Vital Notes
+                    </label>
+
+                    <textarea
+                        id="vital_notes"
+                        name="vital_notes"
+                        rows="3"
+                        placeholder="Record relevant vital signs or measurements..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Pain -->
+                <div class="mb-5">
+
+                    <label
+                        for="pain_comfort"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        Pain & Comfort
+                    </label>
+
+                    <textarea
+                        id="pain_comfort"
+                        name="pain_comfort"
+                        rows="3"
+                        placeholder="Record pain level, location or comfort observations..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Medication -->
+                <div class="mb-5">
+
+                    <label
+                        for="medication_notes"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        Medication Notes
+                    </label>
+
+                    <textarea
+                        id="medication_notes"
+                        name="medication_notes"
+                        rows="3"
+                        placeholder="Record relevant medication administration or observations..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+
+                <!-- Additional -->
+                <div>
+
+                    <label
+                        for="additional_notes"
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                        Additional Notes
+                    </label>
+
+                    <textarea
+                        id="additional_notes"
+                        name="additional_notes"
+                        rows="4"
+                        placeholder="Add any other information the doctor should know..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- Submit -->
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+
+                <a
+                    href="/nurse/patient-logs"
+                    class="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-semibold text-center hover:bg-slate-50"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm"
+                >
+
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M5 12h14M13 6l6 6-6 6"
+                        />
+                    </svg>
+
+                    Send Patient Log
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+</body>
+</html>

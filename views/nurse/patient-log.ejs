@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Patient Log | HopeLeaf</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">
+                    Patient Log
+                </h1>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Patient information sent to the assigned doctor
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+
+                <a
+                    href="/nurse/patient-logs"
+                    class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium"
+                >
+                    My Patient Logs
+                </a>
+
+                <a
+                    href="/nurse/dashboard"
+                    class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium"
+                >
+                    Dashboard
+                </a>
+
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Main -->
+    <main class="max-w-6xl mx-auto px-6 py-8">
+
+        <!-- Success -->
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4">
+
+            <div class="flex items-start gap-3">
+
+                <div class="mt-0.5 text-emerald-600">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+                </div>
+
+                <div>
+                    <h2 class="font-semibold text-emerald-800">
+                        Patient log sent successfully
+                    </h2>
+
+                    <p class="text-sm text-emerald-700 mt-1">
+                        The patient log has been saved and sent to the selected doctor.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Patient / Doctor information -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Patient -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+
+                <div class="px-6 py-5 border-b border-slate-200">
+
+                    <h2 class="text-lg font-semibold text-slate-900">
+                        Patient Information
+                    </h2>
+
+                </div>
+
+                <div class="p-6 space-y-4">
+
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-slate-400">
+                            Patient Name
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-900">
+                            <%= log.patient_name %>
+                        </p>
+                    </div>
+
+                    <% if (log.patient_id) { %>
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-slate-400">
+                                Patient ID
+                            </p>
+
+                            <p class="mt-1 text-sm text-slate-700 break-all">
+                                <%= log.patient_id %>
+                            </p>
+                        </div>
+                    <% } %>
+
+                </div>
+
+            </section>
+
+
+            <!-- Doctor -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+
+                <div class="px-6 py-5 border-b border-slate-200">
+
+                    <h2 class="text-lg font-semibold text-slate-900">
+                        Assigned Doctor
+                    </h2>
+
+                </div>
+
+                <div class="p-6 space-y-4">
+
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-slate-400">
+                            Doctor Name
+                        </p>
+
+                        <p class="mt-1 font-semibold text-slate-900">
+                            <%= log.doctor_name %>
+                        </p>
+                    </div>
+
+                    <% if (log.doctor_id) { %>
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-slate-400">
+                                Doctor ID
+                            </p>
+
+                            <p class="mt-1 text-sm text-slate-700 break-all">
+                                <%= log.doctor_id %>
+                            </p>
+                        </div>
+                    <% } %>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- Log details -->
+        <section class="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="px-6 py-5 border-b border-slate-200">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">
+                            Clinical Log
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            Information recorded by the nurse
+                        </p>
+                    </div>
+
+                    <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold
+                        <%= log.priority === 'urgent'
+                            ? 'bg-red-100 text-red-700'
+                            : log.priority === 'high'
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-blue-100 text-blue-700'
+                        %>"
+                    >
+                        <%= log.priority || "normal" %>
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="p-6 space-y-6">
+
+                <!-- Observations -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Observations
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.observations || "No observations recorded." %>
+                    </div>
+                </div>
+
+
+                <!-- Symptoms -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Symptoms
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.symptoms || "No symptoms recorded." %>
+                    </div>
+                </div>
+
+
+                <!-- Vital notes -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Vital Notes
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.vital_notes || "No vital notes recorded." %>
+                    </div>
+                </div>
+
+
+                <!-- Pain / comfort -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Pain / Comfort
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.pain_comfort || "No pain or comfort information recorded." %>
+                    </div>
+                </div>
+
+
+                <!-- Medication -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Medication Notes
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.medication_notes || "No medication notes recorded." %>
+                    </div>
+                </div>
+
+
+                <!-- Additional notes -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-900 mb-2">
+                        Additional Notes
+                    </h3>
+
+                    <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 whitespace-pre-wrap">
+                        <%= log.additional_notes || "No additional notes recorded." %>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Metadata -->
+        <section class="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+
+            <div class="px-6 py-5 border-b border-slate-200">
+                <h2 class="text-lg font-semibold text-slate-900">
+                    Log Information
+                </h2>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-400">
+                        Status
+                    </p>
+
+                    <p class="mt-1 font-medium text-slate-900">
+                        <%= log.status || "sent" %>
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-400">
+                        Created
+                    </p>
+
+                    <p class="mt-1 text-sm text-slate-700">
+                        <%= log.created_at
+                            ? new Date(log.created_at).toLocaleString()
+                            : "Not available" %>
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-slate-400">
+                        Log ID
+                    </p>
+
+                    <p class="mt-1 text-sm text-slate-700 break-all">
+                        <%= log._id %>
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Actions -->
+        <div class="mt-6 flex flex-wrap gap-3">
+
+            <a
+                href="/nurse/patient-logs"
+                class="px-5 py-3 rounded-lg bg-slate-900 text-white text-sm font-medium hover:bg-slate-800"
+            >
+                View My Patient Logs
+            </a>
+
+            <a
+                href="/nurse/patient-log/new"
+                class="px-5 py-3 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50"
+            >
+                Create Another Log
+            </a>
+
+            <a
+                href="/nurse/dashboard"
+                class="px-5 py-3 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50"
+            >
+                Return to Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1025,5 +1025,72 @@ router.post(
     }
 );
 
+// ==========================================
+// PATIENT LOGS FROM NURSES
+// ==========================================
+
+router.get(
+    "/patient-logs",
+    requireAuth,
+    requireRole("doctor"),
+    async (req, res) => {
+        try {
+            const db = mongoose.connection.db;
+
+            const logs = await db
+                .collection("patient_logs")
+                .find({
+                    doctor_id: new ObjectId(req.session.user.id)
+                })
+                .sort({ created_at: -1 })
+                .toArray();
+
+            res.render("doctor/patient-logs", {
+                user: req.session.user,
+                logs
+            });
+
+        } catch (error) {
+            console.error("Doctor patient logs error:", error);
+            res.status(500).send("Unable to load patient logs.");
+        }
+    }
+);
+
+
+router.get(
+    "/patient-log/:id",
+    requireAuth,
+    requireRole("doctor"),
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            if (!ObjectId.isValid(id)) {
+                return res.status(400).send("Invalid patient log ID.");
+            }
+
+            const db = mongoose.connection.db;
+
+            const log = await db.collection("patient_logs").findOne({
+                _id: new ObjectId(id),
+                doctor_id: new ObjectId(req.session.user.id)
+            });
+
+            if (!log) {
+                return res.status(404).send("Patient log not found.");
+            }
+
+            res.render("doctor/patient-log", {
+                user: req.session.user,
+                log
+            });
+
+        } catch (error) {
+            console.error("Doctor patient log detail error:", error);
+            res.status(500).send("Unable to load patient log.");
+        }
+    }
+);
 module.exports = router;
 

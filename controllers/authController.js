@@ -13,14 +13,17 @@ const register = async (req, res) => {
             return res.send("Please fill in all fields.");
         }
 
-        if (!["doctor", "patient"].includes(role)) {
+        // Allowed registration roles
+        if (!["doctor", "patient", "nurse"].includes(role)) {
             return res.status(400).send("Invalid registration role.");
         }
 
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            return res.status(400).send("An account with this email already exists.");
+            return res.status(400).send(
+                "An account with this email already exists."
+            );
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -33,6 +36,7 @@ const register = async (req, res) => {
         });
 
         res.redirect("/auth/login");
+
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).send("Registration failed.");
@@ -57,12 +61,16 @@ const login = async (req, res) => {
             return res.status(401).send("Invalid email or password.");
         }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
 
         if (!passwordMatch) {
             return res.status(401).send("Invalid email or password.");
         }
 
+        // Store authenticated user in session
         req.session.user = {
             id: user._id,
             name: user.name,
@@ -70,6 +78,7 @@ const login = async (req, res) => {
             role: user.role
         };
 
+        // Redirect based on role
         if (user.role === "admin") {
             return res.redirect("/admin/dashboard");
         }
@@ -78,11 +87,16 @@ const login = async (req, res) => {
             return res.redirect("/doctor/dashboard");
         }
 
+        if (user.role === "nurse") {
+            return res.redirect("/nurse/dashboard");
+        }
+
         if (user.role === "patient") {
             return res.redirect("/patient/dashboard");
         }
 
         res.status(400).send("Invalid user role.");
+
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).send("Login failed.");
@@ -91,6 +105,7 @@ const login = async (req, res) => {
 
 const logout = (req, res) => {
     req.session.destroy((error) => {
+
         if (error) {
             console.error("Logout error:", error);
             return res.status(500).send("Logout failed.");

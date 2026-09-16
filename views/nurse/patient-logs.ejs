@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HopeLeaf | Patient Logs</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hope: {
+                            50: "#f0fdfa",
+                            100: "#ccfbf1",
+                            500: "#14b8a6",
+                            600: "#0d9488",
+                            700: "#0f766e"
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <header class="bg-white border-b border-slate-200">
+
+        <div class="max-w-7xl mx-auto px-6">
+
+            <div class="h-16 flex items-center justify-between">
+
+                <a href="/nurse/dashboard" class="flex items-center gap-3">
+
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center">
+
+                        <svg
+                            class="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 5v14M5 12h14"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div>
+                        <div class="font-bold text-lg text-slate-900">
+                            HopeLeaf
+                        </div>
+
+                        <div class="text-xs text-slate-500">
+                            Nursing Portal
+                        </div>
+                    </div>
+
+                </a>
+
+                <nav class="hidden md:flex items-center gap-2">
+
+                    <a
+                        href="/nurse/dashboard"
+                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                        Dashboard
+                    </a>
+
+                    <a
+                        href="/nurse/patients"
+                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                        Patients
+                    </a>
+
+                    <a
+                        href="/nurse/patient-logs"
+                        class="px-4 py-2 text-sm font-medium bg-teal-50 text-teal-700 rounded-lg"
+                    >
+                        Patient Logs
+                    </a>
+
+                    <a
+                        href="/nurse/incoming-handoffs"
+                        class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                        Handoffs
+                    </a>
+
+                </nav>
+
+                <div class="flex items-center gap-3">
+
+                    <div class="hidden sm:block text-right">
+                        <p class="text-sm font-semibold text-slate-800">
+                            <%= user.name %>
+                        </p>
+
+                        <p class="text-xs text-slate-500">
+                            Nurse
+                        </p>
+                    </div>
+
+                    <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-semibold">
+                        <%= user.name ? user.name.charAt(0).toUpperCase() : "N" %>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+
+            <div>
+
+                <p class="text-sm font-medium text-teal-600 mb-1">
+                    Clinical documentation
+                </p>
+
+                <h1 class="text-3xl font-bold text-slate-900">
+                    My Patient Logs
+                </h1>
+
+                <p class="text-slate-500 mt-2">
+                    Review patient observations and updates recorded during your shifts.
+                </p>
+
+            </div>
+
+            <a
+                href="/nurse/patient-log/new"
+                class="inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-xl font-semibold shadow-sm"
+            >
+
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.8"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 5v14M5 12h14"
+                    />
+                </svg>
+
+                New Patient Log
+
+            </a>
+
+        </div>
+
+
+        <!-- Success message -->
+        <% if (typeof query !== "undefined" && query.created) { %>
+
+            <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-4 rounded-xl flex items-center gap-3">
+
+                <svg
+                    class="w-5 h-5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.8"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
+
+                Patient log created successfully.
+
+            </div>
+
+        <% } %>
+
+
+        <!-- Logs -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+            <div class="px-6 py-5 border-b border-slate-200">
+
+                <h2 class="font-bold text-lg text-slate-900">
+                    Recorded Logs
+                </h2>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Patient information and clinical observations
+                </p>
+
+            </div>
+
+
+            <% if (logs && logs.length > 0) { %>
+
+                <div class="divide-y divide-slate-100">
+
+                    <% logs.forEach(log => { %>
+
+                        <a
+                            href="/nurse/patient-log/<%= log._id %>"
+                            class="block px-6 py-5 hover:bg-slate-50 transition"
+                        >
+
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+                                <!-- Patient -->
+                                <div class="flex items-center gap-4 min-w-0">
+
+                                    <div class="w-11 h-11 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="8"
+                                                r="4"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M4 21a8 8 0 0116 0"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                    <div class="min-w-0">
+
+                                        <h3 class="font-semibold text-slate-900 truncate">
+                                            <%= log.patient_name || "Unknown Patient" %>
+                                        </h3>
+
+                                        <p class="text-sm text-slate-500 mt-1">
+                                            Doctor:
+                                            <span class="text-slate-700">
+                                                <%= log.doctor_name || "Not assigned" %>
+                                            </span>
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Details -->
+                                <div class="flex flex-wrap items-center gap-3">
+
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium border
+                                        <%
+                                            if (log.priority === "urgent") {
+                                        %>
+                                            bg-red-50 text-red-700 border-red-200
+                                        <%
+                                            } else if (log.priority === "high") {
+                                        %>
+                                            bg-orange-50 text-orange-700 border-orange-200
+                                        <%
+                                            } else if (log.priority === "low") {
+                                        %>
+                                            bg-slate-50 text-slate-600 border-slate-200
+                                        <%
+                                            } else {
+                                        %>
+                                            bg-blue-50 text-blue-700 border-blue-200
+                                        <%
+                                            }
+                                        %>
+                                    ">
+                                        <%= log.priority || "normal" %>
+                                    </span>
+
+                                    <span class="text-sm text-slate-500">
+                                        <%
+                                            const logDate = new Date(log.created_at);
+
+                                            if (!isNaN(logDate.getTime())) {
+                                        %>
+
+                                            <%= logDate.toLocaleDateString("en-IN", {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric"
+                                            }) %>
+
+                                        <%
+                                            } else {
+                                        %>
+
+                                            Date unavailable
+
+                                        <%
+                                            }
+                                        %>
+                                    </span>
+
+                                    <svg
+                                        class="w-5 h-5 text-slate-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    <% }); %>
+
+                </div>
+
+            <% } else { %>
+
+                <!-- Empty state -->
+                <div class="px-6 py-16 text-center">
+
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+
+                        <svg
+                            class="w-7 h-7"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.8"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 12h6M9 16h4M8 4h8a2 2 0 012 2v14H6V6a2 2 0 012-2z"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <h3 class="mt-5 font-semibold text-lg text-slate-800">
+                        No patient logs yet
+                    </h3>
+
+                    <p class="text-sm text-slate-500 mt-2">
+                        Create a patient log to start documenting patient care.
+                    </p>
+
+                    <a
+                        href="/nurse/patient-log/new"
+                        class="inline-flex items-center gap-2 mt-6 text-sm font-semibold text-teal-600 hover:text-teal-700"
+                    >
+                        Create Patient Log
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+
+                    </a>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
